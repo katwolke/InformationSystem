@@ -20,14 +20,14 @@ public class Controller {
     private List<Genre> genres;
     private static Collection<Track> tracks;
     private String genresFile = "storage/genresFile.txt";
-    private String fileTracks = "storage/tracksFile.txt";
+    private String tracksFile = "storage/tracksFile.txt";
     private static Logger log = Logger.getAnonymousLogger();
     
     private static Controller instance;
 
     private Controller() {
         loadGenres(genresFile);
-        loadTracks(fileTracks);
+        loadTracks(tracksFile);
     }
  
 
@@ -129,7 +129,7 @@ public class Controller {
     }
     
 	/* 
-	 *   Will be inserted if doesn't have duplicate. 
+	 *   Will be set if doesn't have duplicate. 
 	 */
 	public void setTrack(String trackName, Track newTrack){
 		for (Track track:tracks)
@@ -156,15 +156,4 @@ public class Controller {
 	public void removeTrack(Track track){
 		tracks.remove(track);
 	}
-	
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Controller ms = Controller.getInstance();
-		for (Track track :ms.getAllTracks())
-			System.out.println(track.getTrackName());
-
-	}
-
 }
