@@ -38,7 +38,7 @@ class TrackCommand implements Command {
                  ms.moveTrackAnotherGenre(trackName, genreName); 
                  break;
         	 case "-p":
-                 ms.ptintAllTracks(); 
+                 ms.printAllTracks();
                  break;
         	 default:
         		 System.out.println("Parameter <" + command + "> didn't defined");

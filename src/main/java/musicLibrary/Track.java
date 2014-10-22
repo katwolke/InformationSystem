@@ -1,6 +1,6 @@
 package musicLibrary;
 
-public class Track {
+public class Track implements SearchableRecord {
 	private String trackName;
 	private String singer;
 	private String album;
@@ -74,12 +74,14 @@ public class Track {
 	 * Check on equals genres?..  
 	 * If "Yes" - tracks differ only in genre can be inserted into the collection. No?
 	 */
+    //NO! track
 	 @Override
 	 public boolean equals(Object obj){
 	     Track track = (Track)obj;
 	     if (track == this) 
 	         return true;
-	     if ((obj == null)&& !(obj instanceof Track))
+	     if (obj == null)
+             //obj is already null on second check
 	         return false;
 	     return trackName == track.getTrackName()&&
 	    		singer == track.getSinger() &&
@@ -93,4 +95,10 @@ public class Track {
 		 sb.append(trackName).append(album).append(recordLength).append(singer);
 			return sb.toString().hashCode();
 	 }
+
+    @Override
+    public boolean fitsMask(String mask) {
+    //TODO realization
+        return false;
+    }
 }

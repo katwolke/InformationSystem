@@ -1,6 +1,6 @@
 package musicLibrary;
 
-public class Genre {
+public class Genre implements SearchableRecord {
 	private String genreName;
 	
 	public Genre(String genreName) {
@@ -15,4 +15,9 @@ public class Genre {
 		this.genreName = genreName;
 	}
 
+    @Override
+    public boolean fitsMask(String mask) {
+    //TODO realization
+        return false;
+    }
 }

@@ -5,16 +5,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import musicLibrary.Genre;
 import musicLibrary.Track;
+import musicLibrary.SearchableRecord;
 
 public class ManagementSystem {
     private List<Genre> genres;
@@ -99,7 +96,7 @@ public class ManagementSystem {
 		return tracks;
     }
     
-    public void ptintAllTracks(){
+    public void printAllTracks(){
     	for (Track track:tracks)
     		System.out.println(track.getTrackName() + " - " +track.getSinger() + " - " + track.getAlbum() + " - " +track.getRecordLength() + " - " +track.getGenre() );
     }
@@ -129,13 +126,14 @@ public class ManagementSystem {
     	
     	return track;
     }
-    
+
+    //may be better call it "PrintTrackInfo"?
     public void getTrackInfo(String trackName){
     	Track track = getTrack(trackName);
     	System.out.println("Track title - " + track.getTrackName() + "\r" +
     			"Singer - " + track.getSinger() + "\r" +
     			"Album - " + track.getAlbum() + "\r" +
-    			"Record length - " + track.getRecordLength() + "\r" +
+    			"SearchableRecord length - " + track.getRecordLength() + "\r" +
     	    	"Genre - " + track.getGenre() );
     }
     
@@ -155,16 +153,47 @@ public class ManagementSystem {
 	}
 	
 	/*
-	 * will be inserted if doesn't have duplicate.  
+	 * will be inserted if doesn't have duplicate.
+	 * Doesn't it need a check?
 	 */
 	public void insertTrack(Track track){
-		tracks.add(track);
+        Iterator<Track> checkIfAlreadyThere = tracks.iterator();
+        boolean ifAlreadyThere = false;
+        while (checkIfAlreadyThere.hasNext())
+        {
+            if(checkIfAlreadyThere.next().equals(track)) ifAlreadyThere = true;
+        }
+		if (!ifAlreadyThere) tracks.add(track);
 	}
 	
 	/*
 	 * remove from collection, from file will be removed after write changes
 	 */
+
 	public void removeTrack(Track track){
 		tracks.remove(track);
 	}
+
+    /*
+     * Not sure about Collection<SearchableRecord>
+     *     may be separate search in genres/tracks???
+     */
+    public Collection<SearchableRecord> searchItems(String mask)
+    {
+        Collection<SearchableRecord> fits = new ArrayList<SearchableRecord>();
+        Iterator<Track> trackIterator = tracks.iterator();
+        Iterator<Genre> genreIterator = genres.iterator();
+        while (trackIterator.hasNext())
+        {
+            SearchableRecord checked = trackIterator.next();
+            if (checked.fitsMask(mask)) fits.add(checked);
+        }
+        while (genreIterator.hasNext())
+        {
+            SearchableRecord checked = genreIterator.next();
+            if (checked.fitsMask(mask)) fits.add(checked);
+        }
+        return fits;
+    }
+
 }
