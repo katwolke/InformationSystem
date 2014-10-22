@@ -72,8 +72,6 @@ public class ManagementSystem {
 			Scanner scanner = new Scanner(reader);
 			scanner.useDelimiter(Pattern.compile("[;\\s*\r]+"));
 			try {
-			//	String line = reader.readLine();
-			//	while (line != null) {
 					while (scanner.hasNext()) {
 						String trackName = scanner.next();
 						String singer = scanner.next();
@@ -83,10 +81,7 @@ public class ManagementSystem {
 						tracks.add(new Track(genre, trackName, singer, album, recordLength));
 	
 					}
-			//		line = reader.readLine();
-			//	}
 			} finally {
-				
 				scanner.close();
 				reader.close();
 				inputStream.close();
