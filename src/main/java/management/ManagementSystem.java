@@ -16,24 +16,24 @@ import java.util.regex.Pattern;
 import musicLibrary.Genre;
 import musicLibrary.Track;
 
-public class Controller {
+public class ManagementSystem {
     private List<Genre> genres;
     private static Collection<Track> tracks;
     private String genresFile = "storage/genresFile.txt";
     private String tracksFile = "storage/tracksFile.txt";
     private static Logger log = Logger.getAnonymousLogger();
     
-    private static Controller instance;
+    private static ManagementSystem instance;
 
-    private Controller() {
+    public ManagementSystem() {
         loadGenres(genresFile);
         loadTracks(tracksFile);
     }
  
 
-    public static synchronized Controller getInstance() {
+    public static synchronized ManagementSystem getInstance() {
         if (instance == null) {
-            instance = new Controller();
+            instance = new ManagementSystem();
         }
         return instance;
     }
@@ -70,21 +70,23 @@ public class Controller {
 			InputStreamReader inputStream = new InputStreamReader(new FileInputStream(new File(tracksFile)),"UTF-8");
 			BufferedReader reader = new BufferedReader(inputStream);
 			Scanner scanner = new Scanner(reader);
-			scanner.useDelimiter(Pattern.compile("[;]+"));
+			scanner.useDelimiter(Pattern.compile("[;\\s*\r]+"));
 			try {
-				String line = reader.readLine();
-				while (line != null) {
-					if (scanner.hasNext()) {
+			//	String line = reader.readLine();
+			//	while (line != null) {
+					while (scanner.hasNext()) {
 						String trackName = scanner.next();
 						String singer = scanner.next();
 						String album = scanner.next();
 						String recordLength = scanner.next();
 						String genre = scanner.next();
 						tracks.add(new Track(genre, trackName, singer, album, recordLength));
+	
 					}
-					line = reader.readLine();
-				}
+			//		line = reader.readLine();
+			//	}
 			} finally {
+				
 				scanner.close();
 				reader.close();
 				inputStream.close();
@@ -102,6 +104,11 @@ public class Controller {
 		return tracks;
     }
     
+    public void ptintAllTracks(){
+    	for (Track track:tracks)
+    		System.out.println(track.getTrackName() + " - " +track.getSinger() + " - " + track.getAlbum() + " - " +track.getRecordLength() + " - " +track.getGenre() );
+    }
+    
     public Collection<Track> getTracksFromGenre(Genre genre){
     	Collection<Track> tracksFromGenre = new HashSet<Track>();
     	for(Track track:tracks)
@@ -110,12 +117,11 @@ public class Controller {
 		return tracksFromGenre;
     }
     
-    public void moveTrackAnotherGenre(Genre oldGenre, Track track, Genre newGenre){
-    	for (Track currentTrack : getTracksFromGenre(oldGenre))
-    		if(currentTrack.getTrackName().equals(track.getTrackName())){
-    			currentTrack.setGenre(newGenre.getGenreName());
-    			break;
-    		}
+    public void moveTrackAnotherGenre(String trackName, String genreName){
+    	Track currentTrack = getTrack(trackName);
+    	currentTrack.setGenre(genreName);
+    	//add method to write changes 
+    	System.out.println("Done");
     }
     
     public Track getTrack(String trackName){
@@ -125,7 +131,17 @@ public class Controller {
     			track = currentTrack;
     			break;
     		}
+    	
     	return track;
+    }
+    
+    public void getTrackInfo(String trackName){
+    	Track track = getTrack(trackName);
+    	System.out.println("Track title - " + track.getTrackName() + "\r" +
+    			"Singer - " + track.getSinger() + "\r" +
+    			"Album - " + track.getAlbum() + "\r" +
+    			"Record length - " + track.getRecordLength() + "\r" +
+    	    	"Genre - " + track.getGenre() );
     }
     
 	/* 

@@ -81,13 +81,13 @@ public class Track {
 	         return true;
 	     if ((obj == null)&& !(obj instanceof Track))
 	         return false;
-	     return trackName ==track.trackName &&
-	    		singer == track.singer &&
-	    		album == track.album&&
-	    		recordLength == track.recordLength;
+	     return trackName == track.getTrackName()&&
+	    		singer == track.getSinger() &&
+	    		album == track.getAlbum()&&
+	    		recordLength == track.getRecordLength();
 	 }
 	 
-	 @Override
+	@Override
 	 public int hashCode(){
 		 StringBuilder sb = new StringBuilder();
 		 sb.append(trackName).append(album).append(recordLength).append(singer);
