@@ -10,7 +10,7 @@ class TrackCommand implements Command {
     public boolean execute(String... args) {
     	 if (args == null) {
     		 System.out.println("You must specify the parameter. Type \"help track\" to view available" );
-         } //else if((args.length -1 == 0))
+         }// else if((args.length -1 == 0))
         	//System.out.println("You must specify the object to process" );
          else {
         	 String command = args[0];
@@ -18,27 +18,27 @@ class TrackCommand implements Command {
         	 switch(command){
         	 case "-i":
         		 trackName = args[1];
-                 ms.getTrackInfo(trackName); 
+                 ms.printTrackInfo(trackName); 
                  break;
         	 case "-s":
-        		 trackName = args[1];
+        		// trackName = args[1];
         		 System.out.println("The option is not ready yet"); 
                  break;
         	 case "-a":
-        		 trackName = args[1];
+        		// trackName = args[1];
         		 System.out.println("The option is not ready yet");
                  break;
         	 case "-r":
-        		 trackName = args[1];
+        		// trackName = args[1];
         		 System.out.println("The option is not ready yet");
                  break;
         	 case "-g":
         		 trackName = args[1];
         		 String genreName = args[2];
-                 ms.moveTrackAnotherGenre(trackName, genreName); 
+        		 ms.moveTrackAnotherGenre(trackName, genreName);
                  break;
         	 case "-p":
-                 ms.printAllTracks();
+                 ms.printAllTracksTitle();
                  break;
         	 default:
         		 System.out.println("Parameter <" + command + "> didn't defined");

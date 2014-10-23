@@ -1,23 +1,21 @@
 package management;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 import musicLibrary.Genre;
 import musicLibrary.Track;
-import musicLibrary.SearchableRecord;
 
 public class ManagementSystem {
     private List<Genre> genres;
     private static Collection<Track> tracks;
-    private String genresFile = "storage/genresFile.txt";
-    private String tracksFile = "storage/tracksFile.txt";
+    private String genresFile = "storage/genresFile.bin";
+    private String tracksFile = "storage/traksFile.bin";
     private static Logger log = Logger.getAnonymousLogger();
     
     private static ManagementSystem instance;
@@ -35,54 +33,18 @@ public class ManagementSystem {
         return instance;
     }
 
-	/*
-	 * Serialization will be added here, when we implement a part with writeObject  
-	 */   
+
     public void loadGenres(String genresFile){
-    	genres = new ArrayList<>();
 		try {
-			InputStreamReader inputStream = new InputStreamReader(new FileInputStream(new File(genresFile)),"UTF-8");
-			BufferedReader reader = new BufferedReader(inputStream);
-			try {
-				String line = reader.readLine();
-				while (line != null) {
-						genres.add(new Genre(line.trim()));
-					line = reader.readLine();
-				}
-			} finally {
-				reader.close();
-				inputStream.close();
-			}
+			genres = (ArrayList)FileOperation.deserialized(genresFile, ArrayList.class);
 		} catch (IOException e) {
 			log.info("Caught exception while processing file: " + e.getMessage());
 		}
     }
-    
-	/*
-	 * Serialization will be added here, when we implement a part with writeObject  
-	 */    
+      
     public static void loadTracks(String tracksFile) {
-		tracks = new HashSet<Track>();
 		try {
-			InputStreamReader inputStream = new InputStreamReader(new FileInputStream(new File(tracksFile)),"UTF-8");
-			BufferedReader reader = new BufferedReader(inputStream);
-			Scanner scanner = new Scanner(reader);
-			scanner.useDelimiter(Pattern.compile("[;\\s*\r]+"));
-			try {
-					while (scanner.hasNext()) {
-						String trackName = scanner.next();
-						String singer = scanner.next();
-						String album = scanner.next();
-						String recordLength = scanner.next();
-						String genre = scanner.next();
-						tracks.add(new Track(genre, trackName, singer, album, recordLength));
-	
-					}
-			} finally {
-				scanner.close();
-				reader.close();
-				inputStream.close();
-			}
+			tracks = (HashSet) FileOperation.deserialized(tracksFile, HashSet.class);
 		} catch (IOException e) {
 			log.info("Caught exception while processing file: " + e.getMessage());
 		}
@@ -96,9 +58,9 @@ public class ManagementSystem {
 		return tracks;
     }
     
-    public void printAllTracks(){
+    public void printAllTracksTitle(){
     	for (Track track:tracks)
-    		System.out.println(track.getTrackName() + " - " +track.getSinger() + " - " + track.getAlbum() + " - " +track.getRecordLength() + " - " +track.getGenre() );
+    		System.out.println(track.getTrackName());
     }
     
     public Collection<Track> getTracksFromGenre(Genre genre){
@@ -112,8 +74,11 @@ public class ManagementSystem {
     public void moveTrackAnotherGenre(String trackName, String genreName){
     	Track currentTrack = getTrack(trackName);
     	currentTrack.setGenre(genreName);
-    	//add method to write changes 
-    	System.out.println("Done");
+    	try {
+			FileOperation.serialized("storage/traksFile.bin", tracks);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
     
     public Track getTrack(String trackName){
@@ -123,38 +88,34 @@ public class ManagementSystem {
     			track = currentTrack;
     			break;
     		}
-    	
+    	if (track == null)
+    		throw new IllegalArgumentException("Wrong title of track, or you forgot to use quotation marks");
     	return track;
     }
 
-    //may be better call it "PrintTrackInfo"?
-    public void getTrackInfo(String trackName){
+    public void printTrackInfo(String trackName){
     	Track track = getTrack(trackName);
-    	System.out.println("Track title - " + track.getTrackName() + "\r" +
-    			"Singer - " + track.getSinger() + "\r" +
-    			"Album - " + track.getAlbum() + "\r" +
-    			"SearchableRecord length - " + track.getRecordLength() + "\r" +
-    	    	"Genre - " + track.getGenre() );
+    	System.out.println(track.toString());
     }
     
-	/* 
-	 *   Will be set if doesn't have duplicate. 
-	 */
-	public void setTrack(String trackName, Track newTrack){
+	public void setTrack(String trackName, String ...args) throws IOException{
+		if(args.length< 5)
+			throw new IllegalArgumentException("Don't skip parameters, if don't no info - type \"-\"");
 		for (Track track:tracks)
 			if(track.getTrackName() == trackName){
-				track.setGenre(newTrack.getGenre());
-				track.setTrackName(newTrack.getTrackName());
-				track.setSinger(newTrack.getSinger());
-				track.setAlbum(newTrack.getAlbum());
-				track.setRecordLength(newTrack.getRecordLength());
+				track.setGenre(args[0]);
+				track.setTrackName(args[1]);
+				track.setSinger(args[2]);
+				track.setAlbum(args[3]);
+				track.setRecordLength(args[4]);
 				break;
 			}
+		FileOperation.serialized("storage/traksFile.bin", tracks);
 	}
 	
 	/*
-	 * will be inserted if doesn't have duplicate.
 	 * Doesn't it need a check?
+	 * > I don't think so, compiler have to check it when adds element into HashSet
 	 */
 	public void insertTrack(Track track){
         Iterator<Track> checkIfAlreadyThere = tracks.iterator();
@@ -166,12 +127,13 @@ public class ManagementSystem {
 		if (!ifAlreadyThere) tracks.add(track);
 	}
 	
-	/*
-	 * remove from collection, from file will be removed after write changes
-	 */
-
 	public void removeTrack(Track track){
 		tracks.remove(track);
+		try {
+			FileOperation.serialized("storage/traksFile.bin", tracks);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
     /*

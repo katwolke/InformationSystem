@@ -1,6 +1,12 @@
 package musicLibrary;
 
-public class Genre implements SearchableRecord {
+import java.io.Serializable;
+
+import management.SearchableRecord;
+
+public class Genre implements SearchableRecord, Serializable {
+
+	private static final long serialVersionUID = 1L;
 	private String genreName;
 	
 	public Genre(String genreName) {

@@ -1,8 +1,12 @@
 package commands;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
  
 /**
  * @author Ksiona
@@ -58,12 +62,17 @@ public class CommandProcessor {
         String[] args;
  
         public ParsedCommand(String line) {
-            String result[] = line.split(" ");
+        	List<String> result = new ArrayList<>();
+        	Pattern pattern = Pattern.compile("((\\\"[^\"]+\\\")|\\S+)");
+    		Matcher matcher = pattern.matcher(line);
+    		while (matcher.find())
+    		   result.add(matcher.group().replaceAll("\"",""));
+    	
             if (result != null) {
-                command = result[0];
-                if (result.length > 1) {
-                    args = new String[result.length - 1];
-                    System.arraycopy(result, 1, args, 0, args.length);
+                command = result.get(0);
+                if (result.size() > 1) {
+                	result.remove(0);
+                    args = result.toArray(new String[0]);                  
                 }
             }
         }

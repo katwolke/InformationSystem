@@ -1,6 +1,12 @@
 package musicLibrary;
 
-public class Track implements SearchableRecord {
+import java.io.Serializable;
+
+import management.SearchableRecord;
+
+public class Track implements SearchableRecord, Serializable {
+
+	private static final long serialVersionUID = 1L;
 	private String trackName;
 	private String singer;
 	private String album;
@@ -67,7 +73,10 @@ public class Track implements SearchableRecord {
 	}
 	
 	public String toString() {
-	       return getTrackName() + "; " + getSinger() + "; " + getAlbum() + "; " + getRecordLength() + "; " + getGenre();
+		StringBuilder sb = new StringBuilder();
+	       return sb.append("Title: \"").append(getTrackName()).append("\", Singer: \"").append(getSinger())
+	    		   .append("\", Album: \"").append(getAlbum()).append("\", Record length: ").append(getRecordLength())
+	    		   .append(", Genre: \"").append(getGenre()).append("\"").toString();
 }
 
 	/*  

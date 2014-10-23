@@ -1,5 +1,0 @@
-Simple_song1; Singer; Album; 3.50; unsorted
-Simple_song; Singer; Album; 3.50; unsorted
-Simple_song; Singer; Album; 3.50; unsorted
-Simple_song4; Singer; Album; 3.50; unsorted
-Simple_song5; Singer; Album; 3.50; pop
