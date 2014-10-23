@@ -98,9 +98,7 @@ public class ManagementSystem {
     	System.out.println(track.toString());
     }
     
-	public void setTrack(String trackName, String ...args) throws IOException{
-		if(args.length< 5)
-			throw new IllegalArgumentException("Don't skip parameters, if don't no info - type \"-\"");
+	public void setTrack(String trackName, String ...args){
 		for (Track track:tracks)
 			if(track.getTrackName() == trackName){
 				track.setGenre(args[0]);
@@ -110,21 +108,33 @@ public class ManagementSystem {
 				track.setRecordLength(args[4]);
 				break;
 			}
-		FileOperation.serialized("storage/traksFile.bin", tracks);
+		try{
+			FileOperation.serialized("storage/traksFile.bin", tracks);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/*
 	 * Doesn't it need a check?
 	 * > I don't think so, compiler have to check it when adds element into HashSet
+	 * >> fixed my  mistake in method equals, no need extra check 
 	 */
-	public void insertTrack(Track track){
-        Iterator<Track> checkIfAlreadyThere = tracks.iterator();
+	public void insertTrack(String ...args){
+		Track track = new Track(args[0], args[1], args[2], args[3], args[4]);
+        /*Iterator<Track> checkIfAlreadyThere = tracks.iterator();
         boolean ifAlreadyThere = false;
         while (checkIfAlreadyThere.hasNext())
         {
             if(checkIfAlreadyThere.next().equals(track)) ifAlreadyThere = true;
         }
-		if (!ifAlreadyThere) tracks.add(track);
+		if (!ifAlreadyThere)*/ 
+		tracks.add(track);
+		try{
+			FileOperation.serialized("storage/traksFile.bin", tracks);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void removeTrack(Track track){

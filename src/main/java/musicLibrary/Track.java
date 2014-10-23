@@ -20,7 +20,7 @@ public class Track implements SearchableRecord, Serializable {
 		this.album = album;
 		this.recordLength = recordLength;
 	}
-
+	
 	public String getGenre() {
 		return genre;
 	}
@@ -83,19 +83,20 @@ public class Track implements SearchableRecord, Serializable {
 	 * Check on equals genres?..  
 	 * If "Yes" - tracks differ only in genre can be inserted into the collection. No?
 	 */
-    //NO! track
+    //NO! track - > fixed
 	 @Override
 	 public boolean equals(Object obj){
 	     Track track = (Track)obj;
 	     if (track == this) 
 	         return true;
-	     if (obj == null)
-             //obj is already null on second check
+	     if (obj == null){
 	         return false;
-	     return trackName == track.getTrackName()&&
-	    		singer == track.getSinger() &&
-	    		album == track.getAlbum()&&
-	    		recordLength == track.getRecordLength();
+	     }
+	     return trackName.equalsIgnoreCase(track.getTrackName()) &&
+	    		 singer.equalsIgnoreCase(track.getSinger()) &&
+	    		 album.equalsIgnoreCase(track.getAlbum()) && 
+	    		 recordLength.equalsIgnoreCase(track.getRecordLength()) &&
+	    		 genre.equalsIgnoreCase(track.getGenre());
 	 }
 	 
 	@Override

@@ -1,47 +1,60 @@
 package commands;
 
+import java.util.logging.Logger;
+
 import management.ManagementSystem;
 
 class TrackCommand implements Command {
 	
 	ManagementSystem ms = new ManagementSystem();
-	
-    @Override
+   
+	@Override
     public boolean execute(String... args) {
+    	Logger log = Logger.getAnonymousLogger();
     	 if (args == null) {
-    		 System.out.println("You must specify the parameter. Type \"help track\" to view available" );
-         }// else if((args.length -1 == 0))
-        	//System.out.println("You must specify the object to process" );
-         else {
+    		 log.warning("You must specify the parameter. Type \"help track\" to view available" );
+         } else {
         	 String command = args[0];
-        	 String trackName;
         	 switch(command){
         	 case "-i":
-        		 trackName = args[1];
-                 ms.printTrackInfo(trackName); 
+        		 if((args.length -1 == 0)){
+        			 System.out.println("Type track title to process" );
+        			 break;
+        		 }
+        		 ms.printTrackInfo(args[1]); 
                  break;
         	 case "-s":
-        		// trackName = args[1];
-        		 System.out.println("The option is not ready yet"); 
+        		 if((args.length -1 == 0)){
+        			 System.out.println("Type track title to process" );
+        			 break;
+        		 }
+        		 log.info("The option \"set track info\" is not ready yet"); 
                  break;
         	 case "-a":
-        		// trackName = args[1];
-        		 System.out.println("The option is not ready yet");
+        		 if((args.length -1 < 5)){
+        			 System.out.println("Don't skip parameters, if don't no info - type \"-\" \r" +
+        			 		"Example: -a \"genre\" \"title\" \"singer\" \"-\" -" );
+        			 break;
+        		 }
+        		 String[] arguments = new String[args.length - 1];
+                 System.arraycopy(args, 1, arguments, 0, arguments.length);
+        		 ms.insertTrack(arguments);
                  break;
         	 case "-r":
-        		// trackName = args[1];
-        		 System.out.println("The option is not ready yet");
+        		 if((args.length -1 == 0)){
+        			 System.out.println("Type track title to remove" );
+        			 break;
+        		 }
+        		 log.info("The option \"remove track\" is not ready yet");
                  break;
         	 case "-g":
-        		 trackName = args[1];
-        		 String genreName = args[2];
-        		 ms.moveTrackAnotherGenre(trackName, genreName);
+        		 ms.moveTrackAnotherGenre(args[1], args[2]);
                  break;
         	 case "-p":
                  ms.printAllTracksTitle();
                  break;
         	 default:
-        		 System.out.println("Parameter <" + command + "> didn't defined");
+        		 log.warning("Parameter <" + command + "> didn't defined");
         	 }
          }
         return true;
@@ -50,11 +63,11 @@ class TrackCommand implements Command {
     @Override
     public void printHelp() {
         System.out.println(
-        		"-i [track name]			get track info \r" +
-        		"-s [track name]			set track info \r" +
-        		"-a [track parameters]		insert (add) track into library \r" +
-        		"-r [track name]			remove track \r" +
-        		"-g [track name, genre name]	set another genre \r" +
+        		"-i \"track name\"			get track info \r" +
+        		"-s \"track name\"			set track info \r" +
+        		"-a \"track parameters\"		insert (add) track into library \r" +
+        		"-r \"track name\"			remove track \r" +
+        		"-g \"track name\" \"genre name\"	set another genre \r" +
         		"-p 				print info for all available tracks \r");
     }
 

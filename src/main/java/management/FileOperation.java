@@ -24,7 +24,6 @@ public class FileOperation {
 		try {
 			objectOutStream = new ObjectOutputStream(new FileOutputStream(new File(fileName)));
 			objectOutStream.writeObject(obj);
-			System.out.println("Wrote object using serialization, file name: " + fileName);    		 
 		}
 		catch (Exception e) {
 			log.info("Caught exception while processing object: " + e.getMessage());
@@ -39,7 +38,6 @@ public class FileOperation {
 		try {
 			objectInStream = new ObjectInputStream(new FileInputStream(new File(fileName)));
 			obj = (classType) objectInStream.readObject();
-			System.out.println("Read object using serialization... ");
 		}catch (Exception e) {
 			log.info("Caught exception while processing object: " + e.getMessage());
 		}finally{
