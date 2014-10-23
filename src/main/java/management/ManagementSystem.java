@@ -136,7 +136,18 @@ public class ManagementSystem {
 			e.printStackTrace();
 		}
 	}
-	
+
+    /*
+     * Genres has only ArrayList, check is needed
+     */
+    public void insertGenre(Genre genre){
+        boolean ifAlreadyThere = false;
+        for(Genre alreadyThere:genres){
+            if(alreadyThere.equals(genre)) ifAlreadyThere = true;
+        }
+        if(!ifAlreadyThere) genres.add(genre);
+    }
+
 	public void removeTrack(Track track){
 		tracks.remove(track);
 		try {
@@ -150,22 +161,51 @@ public class ManagementSystem {
      * Not sure about Collection<SearchableRecord>
      *     may be separate search in genres/tracks???
      */
-    public Collection<SearchableRecord> searchItems(String mask)
-    {
+    public Collection<SearchableRecord> searchTracks(String mask) {
         Collection<SearchableRecord> fits = new ArrayList<SearchableRecord>();
-        Iterator<Track> trackIterator = tracks.iterator();
         Iterator<Genre> genreIterator = genres.iterator();
-        while (trackIterator.hasNext())
-        {
-            SearchableRecord checked = trackIterator.next();
-            if (checked.fitsMask(mask)) fits.add(checked);
-        }
-        while (genreIterator.hasNext())
-        {
-            SearchableRecord checked = genreIterator.next();
+        for (SearchableRecord checked : tracks) {
             if (checked.fitsMask(mask)) fits.add(checked);
         }
         return fits;
+    }
+
+    public Collection<SearchableRecord> searchGenres(String mask) {
+        Collection<SearchableRecord> fits = new ArrayList<SearchableRecord>();
+        for (SearchableRecord checked : genres) {
+            if (checked.fitsMask(mask)) fits.add(checked);
+        }
+        return fits;
+    }
+
+
+    public void addTracks(String fileName) {
+        Collection<Track> records;
+        try {
+            records = (HashSet) FileOperation.deserialized(fileName, HashSet.class);
+            tracks.addAll(records);
+        } catch (IOException e) {
+            log.info("Caught exception while processing file: " + e.getMessage());
+        }
+    }
+    /*
+     * Not the best realization, may be HashSet for Genres too?
+     */
+    public void addGenres(String fileName) {
+        Collection<Genre> records;
+        try {
+            records = (ArrayList) FileOperation.deserialized(fileName, ArrayList.class);;
+            for(Genre addedGenre: records)
+            {
+                boolean ifAlreadyThere = false;
+                for(Genre alreadyThere:genres){
+                    if(alreadyThere.equals(addedGenre)) ifAlreadyThere = true;
+                }
+                if(!ifAlreadyThere) genres.add(addedGenre);
+            }
+        } catch (IOException e) {
+            log.info("Caught exception while processing file: " + e.getMessage());
+        }
     }
 
 }
