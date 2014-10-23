@@ -146,6 +146,11 @@ public class ManagementSystem {
             if(alreadyThere.equals(genre)) ifAlreadyThere = true;
         }
         if(!ifAlreadyThere) genres.add(genre);
+        try{
+            FileOperation.serialized("storage/genresFile.bin", genres);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 	public void removeTrack(Track track){
