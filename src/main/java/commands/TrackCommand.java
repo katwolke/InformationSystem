@@ -18,22 +18,42 @@ class TrackCommand implements Command {
         	 switch(command){
         	 case "-i":
         		 if((args.length -1 == 0)){
-        			 System.out.println("Type track title to process" );
+        			 System.out.println("Enter track title to process" );
         			 break;
         		 }
         		 ms.printTrackInfo(args[1]); 
                  break;
         	 case "-s":
         		 if((args.length -1 == 0)){
-        			 System.out.println("Type track title to process" );
+        			 System.out.println("Enter track title and parameters with new values to process" );
         			 break;
         		 }
-        		 log.info("The option \"set track info\" is not ready yet"); 
+        		 String[] setArgs = { "-", args[1], "-", "-", "-"};
+        		 for(int i=2;i<args.length;i++)
+	        		 switch(args[i]){
+	        		 case "genre":
+	        			 setArgs[0] = args[i+1];
+	        		 case "title":
+	        			 setArgs[1] = args[i+1];
+	        			 break;
+	        		 case "singer":
+	        			 setArgs[2] = args[i+1];
+	        			 break;
+	        		 case "album":
+	        			 setArgs[3] = args[i+1];
+	        			 break;
+	        		 case "length":
+	        			 setArgs[4] = args[i+1];
+	        			 break;
+	        		 default:
+	        			 break;
+        		 }
+        		 ms.setTrack(args[1], setArgs);
                  break;
         	 case "-a":
-        		 if((args.length -1 < 5)){
-        			 System.out.println("Don't skip parameters, if don't no info - type \"-\" \r" +
-        			 		"Example: -a \"genre\" \"title\" \"singer\" \"-\" -" );
+        		 if((args.length -1 == 0)){
+        			 System.out.println("Enter parameters, \r" +
+        			 		"Example: -a \"genre\" \"title\" \"singer\" \"Album\" Record length" );
         			 break;
         		 }
         		 String[] arguments = new String[args.length - 1];
@@ -42,10 +62,10 @@ class TrackCommand implements Command {
                  break;
         	 case "-r":
         		 if((args.length -1 == 0)){
-        			 System.out.println("Type track title to remove" );
+        			 System.out.println("Enter track title and genre to remove" );
         			 break;
         		 }
-        		 log.info("The option \"remove track\" is not ready yet");
+        		 ms.removeTrack(args[1], args[2]);
                  break;
         	 case "-g":
         		 ms.moveTrackAnotherGenre(args[1], args[2]);
@@ -63,12 +83,13 @@ class TrackCommand implements Command {
     @Override
     public void printHelp() {
         System.out.println(
-        		"-i \"track name\"			get track info \r" +
-        		"-s \"track name\"			set track info \r" +
-        		"-a \"track parameters\"		insert (add) track into library \r" +
-        		"-r \"track name\"			remove track \r" +
-        		"-g \"track name\" \"genre name\"	set another genre \r" +
-        		"-p 				print info for all available tracks \r");
+        		"-i \"track title\"				get track info \r" +
+        		"-s \"track title\" \"parameter\" \"new value\"	set track info, you can change several parameters at once, \r" +
+        		"						use the key -g to set track genre, please \r" +
+        		"-a \"track parameters\"				insert (add) track into library \r" +
+        		"-r \"track title\" \"genre name\"			remove track \r" +
+        		"-g \"track title\" \"genre name\"			set another genre \r" +
+        		"-p 						print info for all available tracks \r");
     }
 
     @Override

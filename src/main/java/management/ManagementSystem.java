@@ -1,5 +1,6 @@
 package management;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,23 +9,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import musicLibrary.Genre;
-import musicLibrary.Track;
+import musicLibrary.*;
 
 public class ManagementSystem {
-    private List<Genre> genres;
-    private static Collection<Track> tracks;
-    private String genresFile = "storage/genresFile.bin";
-    private String tracksFile = "storage/traksFile.bin";
+	private Library library;
+    private String storage = "storage/.";
     private static Logger log = Logger.getAnonymousLogger();
     
     private static ManagementSystem instance;
 
     public ManagementSystem() {
-        loadGenres(genresFile);
-        loadTracks(tracksFile);
+        this.library = new Library(loadGenres(storage));
     }
- 
 
     public static synchronized ManagementSystem getInstance() {
         if (instance == null) {
@@ -32,185 +28,123 @@ public class ManagementSystem {
         }
         return instance;
     }
-
-
-    public void loadGenres(String genresFile){
-		try {
-			genres = (ArrayList)FileOperation.deserialized(genresFile, ArrayList.class);
-		} catch (IOException e) {
-			log.info("Caught exception while processing file: " + e.getMessage());
-		}
-    }
-      
-    public static void loadTracks(String tracksFile) {
-		try {
-			tracks = (HashSet) FileOperation.deserialized(tracksFile, HashSet.class);
-		} catch (IOException e) {
-			log.info("Caught exception while processing file: " + e.getMessage());
-		}
-	}
     
-    public List<Genre> getGenres(){
+    public List<Genre> loadGenres(String storage){
+    	List<Genre> genres = new ArrayList<>();
+		try {
+			File dir = new File(storage);
+			for(String path : dir.list()) {
+				genres.add(new Genre(path.substring(0, path.lastIndexOf('.')), (HashSet)FileOperation.deserialized("storage/"+ path, HashSet.class)));
+			}
+		} catch (IOException e) {
+			log.info("Caught exception while processing file: " + e.getMessage());
+		}
 		return genres;
-    	
-    }
-    public Collection<Track> getAllTracks(){
-		return tracks;
     }
     
     public void printAllTracksTitle(){
-    	for (Track track:tracks)
-    		System.out.println(track.getTrackName());
+    	for (Track track:library.getAllTracks())
+    		System.out.println(track.getTrackTitle());
     }
     
-    public Collection<Track> getTracksFromGenre(Genre genre){
-    	Collection<Track> tracksFromGenre = new HashSet<Track>();
-    	for(Track track:tracks)
-    		if(track.getGenre().equals(genre.getGenreName()))
-    			tracksFromGenre.add(track);
-		return tracksFromGenre;
+    public void getTracksTitles(String genreName){
+    	try{
+    		for(Track track:library.getGenre(genreName).getTracks())
+        		System.out.println(track.getTrackTitle());
+    	} catch (IllegalArgumentException e){
+    		System.out.println(e.getMessage());
+    	}
     }
     
-    public void moveTrackAnotherGenre(String trackName, String genreName){
-    	Track currentTrack = getTrack(trackName);
-    	currentTrack.setGenre(genreName);
-    	try {
-			FileOperation.serialized("storage/traksFile.bin", tracks);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    }
-    
-    public Track getTrack(String trackName){
-    	Track track = null;
-    	for(Track currentTrack:tracks)
-    		if(currentTrack.getTrackName().equals(trackName)){
-    			track = currentTrack;
-    			break;
-    		}
-    	if (track == null)
-    		throw new IllegalArgumentException("Wrong title of track, or you forgot to use quotation marks");
-    	return track;
+    public void moveTrackAnotherGenre(String trackTitle, String genreName){
+    	try{
+        	Track currentTrack = library.getTrack(trackTitle);
+        	String oldGenre = currentTrack.getGenre();
+        	currentTrack.setGenre(genreName);
+        	library.getGenre(genreName).insertTrack(currentTrack);
+        	library.getGenre(oldGenre).removeTrack(currentTrack);
+        	System.out.println("Track " + trackTitle +" now belongs to the genre " + genreName);
+    	} catch (IllegalArgumentException e){
+    		System.out.println(e.getMessage());
+    	}
     }
 
-    public void printTrackInfo(String trackName){
-    	Track track = getTrack(trackName);
-    	System.out.println(track.toString());
+    public void printTrackInfo(String trackTitle){
+    	try{
+    		Track track = library.getTrack(trackTitle);
+    		System.out.println(track.toString());
+    	} catch (IllegalArgumentException e){
+    		System.out.println(e.getMessage());
+    	}
     }
-    
-	public void setTrack(String trackName, String ...args){
-		for (Track track:tracks)
-			if(track.getTrackName() == trackName){
-				track.setGenre(args[0]);
-				track.setTrackName(args[1]);
-				track.setSinger(args[2]);
-				track.setAlbum(args[3]);
-				track.setRecordLength(args[4]);
-				break;
-			}
+	
+	public void insertTrack(String ... args) {
 		try{
-			FileOperation.serialized("storage/traksFile.bin", tracks);
-		} catch (IOException e) {
-			e.printStackTrace();
+			Track newTrack = new Track(args[0], args[1], args[2], args[3], args[4]);
+			library.insertTrack(newTrack);
+			FileOperation.serialized("storage/"+newTrack.getGenre()+".bin", library.getGenre(newTrack.getGenre()).getTracks());
+			System.out.println("Successfully placed in storage: " + library.getGenre(newTrack.getGenre()).getGenreName());
+		}catch (ArrayIndexOutOfBoundsException e){
+			System.out.println("Don't skip parameters, if don't no info - type \"-\"");
+		}catch (IOException e) {
+			System.out.println("Caught exception while writing changes: " + e.getMessage() );
 		}
 	}
 	
-	/*
-	 * Doesn't it need a check?
-	 * > I don't think so, compiler have to check it when adds element into HashSet
-	 * >> fixed my  mistake in method equals, no need extra check 
-	 */
-	public void insertTrack(String ...args){
-		Track track = new Track(args[0], args[1], args[2], args[3], args[4]);
-        /*Iterator<Track> checkIfAlreadyThere = tracks.iterator();
-        boolean ifAlreadyThere = false;
-        while (checkIfAlreadyThere.hasNext())
-        {
-            if(checkIfAlreadyThere.next().equals(track)) ifAlreadyThere = true;
-        }
-		if (!ifAlreadyThere)*/ 
-		tracks.add(track);
+	public void setTrack(String trackTitle, String ... args) {
+		Track oldTrack = library.getTrack(trackTitle);
+		if(args[0].equals("-"))
+			args[0] = oldTrack.getGenre();
+		if(args[1].equals("-"))
+			args[1] = oldTrack.getTrackTitle();
+		if(args[2].equals("-"))
+			args[2] = oldTrack.getSinger();
+		if(args[3].equals("-"))
+			args[3] = oldTrack.getAlbum();
+		if(args[4].equals("-"))
+			args[4] = oldTrack.getRecordLength();
+
+		Track newTrack = new Track(args[0], args[1], args[2], args[3], args[4]);
+		library.setTrack(trackTitle, newTrack);
 		try{
-			FileOperation.serialized("storage/traksFile.bin", tracks);
-		} catch (IOException e) {
-			e.printStackTrace();
+			FileOperation.serialized("storage/"+newTrack.getGenre()+".bin", library.getGenre(newTrack.getGenre()).getTracks());
+			System.out.println("Successfully placed in storage: " + library.getGenre(newTrack.getGenre()).getGenreName());
+		}catch (IOException e) {
+			System.out.println("Caught exception while writing changes: " + e.getMessage() );
 		}
 	}
-
-    /*
-     * Genres has only ArrayList, check is needed
-     */
-    public void insertGenre(Genre genre){
-        boolean ifAlreadyThere = false;
-        for(Genre alreadyThere:genres){
-            if(alreadyThere.equals(genre)) ifAlreadyThere = true;
-        }
-        if(!ifAlreadyThere) genres.add(genre);
-        try{
-            FileOperation.serialized("storage/genresFile.bin", genres);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+	
+    public void removeTrack(String trackTitle, String genreName){
+    	try{
+        	Track currentTrack = library.getGenre(genreName).getTrack(trackTitle);
+        	library.getGenre(genreName).removeTrack(currentTrack);
+			FileOperation.serialized("storage/"+library.getGenre(genreName)+".bin", library.getGenre(genreName).getTracks());
+        	System.out.println("Track " + trackTitle +" has been removed ");
+    	} catch (IllegalArgumentException | IOException e){
+    		System.out.println(e.getMessage());
+    	}
     }
-
-	public void removeTrack(Track track){
-		tracks.remove(track);
-		try {
-			FileOperation.serialized("storage/traksFile.bin", tracks);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 
     /*
      * Not sure about Collection<SearchableRecord>
      *     may be separate search in genres/tracks???
      */
-    public Collection<SearchableRecord> searchTracks(String mask) {
+    public Collection<SearchableRecord> searchItems(String mask)
+    {
         Collection<SearchableRecord> fits = new ArrayList<SearchableRecord>();
-        Iterator<Genre> genreIterator = genres.iterator();
-        for (SearchableRecord checked : tracks) {
+        Iterator<Track> trackIterator = library.getAllTracks().iterator();
+        Iterator<Genre> genreIterator = library.getGenres().iterator();
+        while (trackIterator.hasNext())
+        {
+            SearchableRecord checked = trackIterator.next();
+            if (checked.fitsMask(mask)) fits.add(checked);
+        }
+        while (genreIterator.hasNext())
+        {
+            SearchableRecord checked = genreIterator.next();
             if (checked.fitsMask(mask)) fits.add(checked);
         }
         return fits;
-    }
-
-    public Collection<SearchableRecord> searchGenres(String mask) {
-        Collection<SearchableRecord> fits = new ArrayList<SearchableRecord>();
-        for (SearchableRecord checked : genres) {
-            if (checked.fitsMask(mask)) fits.add(checked);
-        }
-        return fits;
-    }
-
-
-    public void addTracks(String fileName) {
-        Collection<Track> records;
-        try {
-            records = (HashSet) FileOperation.deserialized(fileName, HashSet.class);
-            tracks.addAll(records);
-        } catch (IOException e) {
-            log.info("Caught exception while processing file: " + e.getMessage());
-        }
-    }
-    /*
-     * Not the best realization, may be HashSet for Genres too?
-     */
-    public void addGenres(String fileName) {
-        Collection<Genre> records;
-        try {
-            records = (ArrayList) FileOperation.deserialized(fileName, ArrayList.class);;
-            for(Genre addedGenre: records)
-            {
-                boolean ifAlreadyThere = false;
-                for(Genre alreadyThere:genres){
-                    if(alreadyThere.equals(addedGenre)) ifAlreadyThere = true;
-                }
-                if(!ifAlreadyThere) genres.add(addedGenre);
-            }
-        } catch (IOException e) {
-            log.info("Caught exception while processing file: " + e.getMessage());
-        }
     }
 
 }

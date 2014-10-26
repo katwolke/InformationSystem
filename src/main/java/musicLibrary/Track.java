@@ -7,18 +7,18 @@ import management.SearchableRecord;
 public class Track implements SearchableRecord, Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private String trackName;
+	private String trackTitle;
 	private String singer;
 	private String album;
 	private String recordLength;
 	private String genre;
 
-	public Track(String genre, String trackName, String singer, String album, String recordLength) {
-		this.genre = genre;
-		this.trackName = trackName;
-		this.singer = singer;
-		this.album = album;
-		this.recordLength = recordLength;
+	public Track(String genre, String trackTitle, String singer, String album, String recordLength) {
+		this.setGenre(genre);
+		this.setTrackTitle(trackTitle);
+		this.setSinger(singer);
+		this.setAlbum(album);
+		this.setRecordLength(recordLength);
 	}
 	
 	public String getGenre() {
@@ -29,14 +29,14 @@ public class Track implements SearchableRecord, Serializable {
 		this.genre = genre;
 	}
 	
-	public String getTrackName() {
-		return trackName;
+	public String getTrackTitle() {
+		return trackTitle;
 	}
 
-	public void setTrackName(String trackName) {
-		if (trackName == null)
-			throw new IllegalArgumentException("Can't restore track without name");
-		this.trackName = trackName;
+	public void setTrackTitle(String trackTitle) {
+		if (trackTitle == null)
+			throw new IllegalArgumentException("Can't restore track without title");
+		this.trackTitle = trackTitle;
 	}
 
 	public String getSinger() {
@@ -74,17 +74,11 @@ public class Track implements SearchableRecord, Serializable {
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-	       return sb.append("Title: \"").append(getTrackName()).append("\", Singer: \"").append(getSinger())
+	       return sb.append("Title: \"").append(getTrackTitle()).append("\", Singer: \"").append(getSinger())
 	    		   .append("\", Album: \"").append(getAlbum()).append("\", Record length: ").append(getRecordLength())
 	    		   .append(", Genre: \"").append(getGenre()).append("\"").toString();
 }
 
-	/*  
-	 * Check on equals genres?..  
-	 * If "Yes" - tracks differ only in genre can be inserted into the collection. No?
-	 */
-    //NO! track - > fixed
-	 @Override
 	 public boolean equals(Object obj){
 	     Track track = (Track)obj;
 	     if (track == this) 
@@ -92,7 +86,7 @@ public class Track implements SearchableRecord, Serializable {
 	     if (obj == null){
 	         return false;
 	     }
-	     return trackName.equalsIgnoreCase(track.getTrackName()) &&
+	     return trackTitle.equalsIgnoreCase(track.getTrackTitle()) &&
 	    		 singer.equalsIgnoreCase(track.getSinger()) &&
 	    		 album.equalsIgnoreCase(track.getAlbum()) && 
 	    		 recordLength.equalsIgnoreCase(track.getRecordLength()) &&
@@ -102,7 +96,7 @@ public class Track implements SearchableRecord, Serializable {
 	@Override
 	 public int hashCode(){
 		 StringBuilder sb = new StringBuilder();
-		 sb.append(trackName).append(album).append(recordLength).append(singer);
+		 sb.append(trackTitle).append(album).append(recordLength).append(singer);
 			return sb.toString().hashCode();
 	 }
 

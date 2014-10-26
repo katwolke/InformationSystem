@@ -27,7 +27,10 @@ public class GenreCommand implements Command {
         		 System.out.println("The option \"get all tracks this genre\" is not ready yet");
                  break;
         	 case "-p":
+        		 if((args.length -1 == 0)){
         		 System.out.println("The option \"print genre list\" is not ready yet");
+        		 }else
+        			 ms.getTracksTitles(args[1]);
                  break;
            	 default:
         		 System.out.println("Parameter <" + command + "> didn't defined");
@@ -41,7 +44,7 @@ public class GenreCommand implements Command {
 		System.out.println(
 				"-a [new genre name]	add genre into list \r" +
 				"-r [genre name]		remove genre from list \r" +
-				"-g [genre name]		get all tracks this genre \r" +
+				"-p [genre name]		print all tracks of this genre \r" +
 				"-p			print genre list");
 		
 	}

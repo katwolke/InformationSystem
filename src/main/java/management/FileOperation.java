@@ -47,25 +47,31 @@ public class FileOperation {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		Collection<Track> tracks = new HashSet<Track>();
+		Collection<Track> tracks = new HashSet<>();
+		Collection<Track> tracks2 = new HashSet<>();
 		List<Genre> genres = new ArrayList<>();
 		
 		Track track = new Track("Power Metal", "Whispers of the Great Mother", "MaterDea", "A Rose for Egeria", "7.06");
 		tracks.add(track);
-		Genre genre = new Genre(track.getGenre());
-		genres.add(genre);
+		genres.add(new Genre(track.getGenre(), tracks));
+
 		Track track2 = new Track("Symphonic Metal", "500 letters", "Tarja Turunen", "Colours in the dark", "4.22");
-		tracks.add(track2);
-		Genre genre2 = new Genre(track2.getGenre());
-		genres.add(genre2);
+		tracks2.add(track2);
+		genres.add(new Genre(track2.getGenre(), tracks2));
+
+		serialized("storage/"+track.getGenre()+".bin", tracks);
+		serialized("storage/"+track2.getGenre()+".bin", tracks2);
 		
-		serialized("D:/traksFile.bin", tracks);
-		serialized("D:/genresFile.bin", genres);
-		Collection<Track> reTracks = (HashSet)deserialized("storage/traksFile.bin", HashSet.class);
-		System.out.println(reTracks.size());
+		List<Genre> reTracks = new ArrayList<>();
+		File dir = new File("storage/.");
+		for(String path : dir.list()) {
+			reTracks.add(new Genre(path.substring(0, path.lastIndexOf('.')),(HashSet)deserialized("storage/"+ path, HashSet.class)));
+			System.out.println(path.substring(0, path.lastIndexOf('.')));
+		}
 		
-		List<Genre> reGenres = (ArrayList)deserialized("storage/genresFile.bin", ArrayList.class);
-		System.out.println(reGenres.size());
+		
+	//	System.out.println(reTracks.get(0).getTracks().get(0).getTrackTitle());
+	//	System.out.println(reTracks.get(1).getTracks().get(0).getTrackTitle());
 	}
 }
 

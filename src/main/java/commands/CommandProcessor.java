@@ -41,6 +41,8 @@ public class CommandProcessor {
     public void execute() {
         boolean result = true;
         Scanner scanner = new Scanner(System.in, consoleEncoding);
+        System.out.println("Welcome to the information system \"Music Library\" ");
+        System.out.println("To get instructions on how to use enter command \"help\"");
         do {
             System.out.print("> ");
             String fullCommand = scanner.nextLine();
@@ -57,7 +59,7 @@ public class CommandProcessor {
         } while (result);
     }
  
-    class ParsedCommand {
+    private class ParsedCommand {
         String command;
         String[] args;
  
