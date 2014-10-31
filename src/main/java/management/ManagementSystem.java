@@ -1,28 +1,34 @@
 package management;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Logger;
 
-import musicLibrary.*;
+import musicLibrary.Genre;
+import musicLibrary.Library;
+import musicLibrary.Track;
+
+import commands.CommandProcessor;
 
 public class ManagementSystem {
 	private Library library;
     private String storage = "storage/.";
-    private static Logger log = Logger.getAnonymousLogger();
-    
     private static ManagementSystem instance;
 
-    public ManagementSystem() {
+	public ManagementSystem(){
         this.library = new Library(loadGenres(storage));
     }
 
-    public static synchronized ManagementSystem getInstance() {
+    public static synchronized ManagementSystem getInstance(){
         if (instance == null) {
             instance = new ManagementSystem();
         }
@@ -31,14 +37,15 @@ public class ManagementSystem {
     
     public List<Genre> loadGenres(String storage){
     	List<Genre> genres = new ArrayList<>();
-		try {
+    	try {
 			File dir = new File(storage);
-			for(String path : dir.list()) {
-				genres.add(new Genre(path.substring(0, path.lastIndexOf('.')), (HashSet)FileOperation.deserialized("storage/"+ path, HashSet.class)));
+			for(String path : dir.list()){
+				if((path.substring(path.lastIndexOf('.'), path.length()).equals(".bin")))
+					genres.add(new Genre(path.substring(0, path.lastIndexOf('.')), (HashSet)deserialize("storage/"+ path, HashSet.class)));
 			}
-		} catch (IOException e) {
-			log.info("Caught exception while processing file: " + e.getMessage());
-		}
+		} catch (ClassNotFoundException | IOException e) {
+			System.out.println(e.getMessage());
+		} 
 		return genres;
     }
     
@@ -46,11 +53,11 @@ public class ManagementSystem {
     	for (Track track:library.getAllTracks())
     		System.out.println(track.getTrackTitle());
     }
-    
-    public void getTracksTitles(String genreName){
+
+	public void getTracksTitles(String genreName){
     	try{
     		for(Track track:library.getGenre(genreName).getTracks())
-        		System.out.println(track.getTrackTitle());
+    			System.out.println(track.getTrackTitle());
     	} catch (IllegalArgumentException e){
     		System.out.println(e.getMessage());
     	}
@@ -82,12 +89,12 @@ public class ManagementSystem {
 		try{
 			Track newTrack = new Track(args[0], args[1], args[2], args[3], args[4]);
 			library.insertTrack(newTrack);
-			FileOperation.serialized("storage/"+newTrack.getGenre()+".bin", library.getGenre(newTrack.getGenre()).getTracks());
+			serialize("storage/"+newTrack.getGenre()+".bin", library.getGenre(newTrack.getGenre()).getTracks());
 			System.out.println("Successfully placed in storage: " + library.getGenre(newTrack.getGenre()).getGenreName());
 		}catch (ArrayIndexOutOfBoundsException e){
 			System.out.println("Don't skip parameters, if don't no info - type \"-\"");
 		}catch (IOException e) {
-			System.out.println("Caught exception while writing changes: " + e.getMessage() );
+			System.out.println(e.getMessage());
 		}
 	}
 	
@@ -107,10 +114,10 @@ public class ManagementSystem {
 		Track newTrack = new Track(args[0], args[1], args[2], args[3], args[4]);
 		library.setTrack(trackTitle, newTrack);
 		try{
-			FileOperation.serialized("storage/"+newTrack.getGenre()+".bin", library.getGenre(newTrack.getGenre()).getTracks());
+			serialize("storage/"+newTrack.getGenre()+".bin", library.getGenre(newTrack.getGenre()).getTracks());
 			System.out.println("Successfully placed in storage: " + library.getGenre(newTrack.getGenre()).getGenreName());
 		}catch (IOException e) {
-			System.out.println("Caught exception while writing changes: " + e.getMessage() );
+			System.out.println(e.getMessage());
 		}
 	}
 	
@@ -118,8 +125,8 @@ public class ManagementSystem {
     	try{
         	Track currentTrack = library.getGenre(genreName).getTrack(trackTitle);
         	library.getGenre(genreName).removeTrack(currentTrack);
-			FileOperation.serialized("storage/"+library.getGenre(genreName)+".bin", library.getGenre(genreName).getTracks());
-        	System.out.println("Track " + trackTitle +" has been removed ");
+			serialize("storage/"+genreName+".bin", library.getGenre(genreName).getTracks());
+			System.out.println("Track " + trackTitle +" has been removed ");
     	} catch (IllegalArgumentException | IOException e){
     		System.out.println(e.getMessage());
     	}
@@ -146,5 +153,38 @@ public class ManagementSystem {
         }
         return fits;
     }
+    
+    private static void serialize(String fileName, Object obj) throws IOException{
+		try (ObjectOutputStream objectOutStream = new ObjectOutputStream(new FileOutputStream(new File(fileName)))){		
+			objectOutStream.writeObject(obj);
+		}
+	}
+	
+    private static <classType> Object deserialize(String fileName, Class classType) throws IOException, ClassNotFoundException{
+		Object obj = null;
+		try (ObjectInputStream objectInStream = new ObjectInputStream(new FileInputStream(new File(fileName)));) {
+			obj = (classType) objectInStream.readObject();
+		}
+		return obj;
+	}
 
+    public static void main(String[] args){
+    	System.setProperty("file.encoding","UTF-8");
+    	System.setProperty("console.encoding","Cp866");
+    	System.out.println("Welcome to the information system \"Music Library\" \r\n"
+				+ "To get instructions on how to use enter command \"help\"");
+    	getInstance();
+    	
+    	String consoleEncoding = System.getProperty("console.encoding");
+    	if (consoleEncoding != null) {
+    	    try {
+    	        System.setOut(new PrintStream(System.out, true, consoleEncoding));
+    	    } catch (java.io.UnsupportedEncodingException ex) {
+    	        System.err.println("Unsupported encoding set for console: "+consoleEncoding);
+    	    }
+    	}
+    	CommandProcessor cp = new CommandProcessor(System.getProperty("console.encoding"));
+        cp.execute();
+    }
+    
 }

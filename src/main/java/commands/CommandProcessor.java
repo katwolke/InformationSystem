@@ -31,21 +31,16 @@ public class CommandProcessor {
         this.consoleEncoding = consoleEncoding;
     }
  
-    public static void main(String[] args) {
-    	System.setProperty("file.encoding","UTF-8"); //  track titles can be written in Cyrillic
-    	System.setProperty("console.encoding","UTF-8");
-        CommandProcessor cp = new CommandProcessor(System.getProperty("console.encoding"));
-        cp.execute();
-    }
-    
     public void execute() {
         boolean result = true;
         Scanner scanner = new Scanner(System.in, consoleEncoding);
-        System.out.println("Welcome to the information system \"Music Library\" ");
-        System.out.println("To get instructions on how to use enter command \"help\"");
         do {
+        	
             System.out.print("> ");
             String fullCommand = scanner.nextLine();
+            if (fullCommand == null || "".equals(fullCommand)) {
+                continue;
+            }
             ParsedCommand parser = new ParsedCommand(fullCommand);
             if (parser.command == null || "".equals(parser.command)) {
                 continue;

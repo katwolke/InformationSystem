@@ -6,10 +6,11 @@ import management.ManagementSystem;
 
 class TrackCommand implements Command {
 	
-	ManagementSystem ms = new ManagementSystem();
+	ManagementSystem ms;
    
 	@Override
     public boolean execute(String... args) {
+		ms = ManagementSystem.getInstance();
     	Logger log = Logger.getAnonymousLogger();
     	 if (args == null) {
     		 log.warning("You must specify the parameter. Type \"help track\" to view available" );
@@ -52,7 +53,7 @@ class TrackCommand implements Command {
                  break;
         	 case "-a":
         		 if((args.length -1 == 0)){
-        			 System.out.println("Enter parameters, \r" +
+        			 System.out.println("Enter parameters, \r\n" +
         			 		"Example: -a \"genre\" \"title\" \"singer\" \"Album\" Record length" );
         			 break;
         		 }
@@ -83,13 +84,13 @@ class TrackCommand implements Command {
     @Override
     public void printHelp() {
         System.out.println(
-        		"-i \"track title\"				get track info \r" +
-        		"-s \"track title\" \"parameter\" \"new value\"	set track info, you can change several parameters at once, \r" +
-        		"						use the key -g to set track genre, please \r" +
-        		"-a \"track parameters\"				insert (add) track into library \r" +
-        		"-r \"track title\" \"genre name\"			remove track \r" +
-        		"-g \"track title\" \"genre name\"			set another genre \r" +
-        		"-p 						print info for all available tracks \r");
+        		"-i \"track title\"				get track info \r\n" +
+        		"-s \"track title\" \"parameter\" \"new value\"	set track info, you can change several parameters at once, \r\n" +
+        		"						use the key -g to set track genre, please \r\n" +
+        		"-a \"track parameters\"				insert (add) track into library \r\n" +
+        		"-r \"track title\" \"genre name\"			remove track \r\n" +
+        		"-g \"track title\" \"genre name\"			set another genre \r\n" +
+        		"-p 						print info for all available tracks \r\n");
     }
 
     @Override

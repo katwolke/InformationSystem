@@ -4,10 +4,11 @@ import management.ManagementSystem;
 
 public class GenreCommand implements Command {
 
-	ManagementSystem ms = new ManagementSystem();
+	ManagementSystem ms;
 	
 	@Override
 	public boolean execute(String... args) {
+		ms = ManagementSystem.getInstance();
 		 if (args == null) {
     		 System.out.println("You must specify the parameter. Type \"help genre\" to view available" );
 		 } else {
@@ -42,9 +43,9 @@ public class GenreCommand implements Command {
 	@Override
 	public void printHelp() {
 		System.out.println(
-				"-a [new genre name]	add genre into list \r" +
-				"-r [genre name]		remove genre from list \r" +
-				"-p [genre name]		print all tracks of this genre \r" +
+				"-a [new genre name]	add genre into list \r\n" +
+				"-r [genre name]		remove genre from list \r\n" +
+				"-p [genre name]		print all tracks of this genre \r\n" +
 				"-p			print genre list");
 		
 	}
