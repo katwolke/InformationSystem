@@ -1,6 +1,6 @@
-package commands;
+package interfaces;
 
-interface Command {
+public interface Command {
 
     static final String COMMAND_NOT_FOUND = "Command not found";
     static final String LINE_DELIMITER = "==========================================";

@@ -1,17 +1,19 @@
 package musicLibrary;
 
+import interfaces.Record;
+import interfaces.RecordsList;
+import interfaces.SearchableRecord;
+
 import java.io.Serializable;
 import java.util.Collection;
 
-import management.SearchableRecord;
-
-public class Genre implements SearchableRecord, Serializable{
+public class Genre implements SearchableRecord, Serializable, RecordsList{
 
 	private static final long serialVersionUID = 1L;
-    private Collection<Track> tracks;
+    private Collection<Record> tracks;
 	private String genreName;
 	
-	public Genre(String genreName, Collection<Track> tracks) {
+	public Genre(String genreName, Collection<Record> tracks) {
 		this.tracks = tracks;
 		this.genreName = genreName;
 	}
@@ -20,13 +22,15 @@ public class Genre implements SearchableRecord, Serializable{
 		this.genreName = genreName;
 	}
 	
-	public Collection<Track> getTracks(){
+	@Override
+	public Collection<Record> getRecords(){
 		return tracks;
 	}
 	
-	public Track getTrack(String trackTitle){
-    	Track track = null;
-    	for(Track currentTrack:tracks)
+	@Override
+	public Record getRecord(String trackTitle){
+		Record track = null;
+    	for(Record currentTrack:tracks)
     		if(currentTrack.getTrackTitle().equalsIgnoreCase(trackTitle)){
     			track = currentTrack;
     			break;
@@ -34,8 +38,9 @@ public class Genre implements SearchableRecord, Serializable{
     	return track;
     }
 	
-	public void setTrack(String trackTitle, Track newTrack){
-		for(Track track:tracks)
+	@Override
+	public void setRecord(String trackTitle, Record newTrack){
+		for(Record track:tracks)
 			if(track.getTrackTitle().equalsIgnoreCase(trackTitle)){
 				track.setGenre(newTrack.getGenre());
 				track.setSinger(newTrack.getSinger());
@@ -45,19 +50,23 @@ public class Genre implements SearchableRecord, Serializable{
 			}
 	}
 	
-	public void insertTrack(Track newTrack){
+	@Override
+	public void insertRecord(Record newTrack){
 		tracks.add(newTrack);
 	}
 	
-	public void removeTrack(Track track){
+	@Override
+	public void removeRecord(Record track){
 		tracks.remove(track);
 	}
 
-	public String getGenreName() {
+	@Override
+	public String getRecordsListName() {
 		return genreName;
 	}
 
-	public void setGenreName(String genreName) {
+	@Override
+	public void setRecordsListName(String genreName) {
 		this.genreName = genreName;
 	}
 

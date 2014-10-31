@@ -1,5 +1,7 @@
 package commands;
 
+import interfaces.Command;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

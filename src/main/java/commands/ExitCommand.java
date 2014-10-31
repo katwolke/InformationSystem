@@ -1,5 +1,7 @@
 package commands;
 
+import interfaces.Command;
+
 import java.util.Map;
 
 class ExitCommand implements Command {

@@ -1,5 +1,7 @@
 package commands;
 
+import interfaces.Command;
+
 import java.util.logging.Logger;
 
 import management.ManagementSystem;
@@ -66,10 +68,10 @@ class TrackCommand implements Command {
         			 System.out.println("Enter track title and genre to remove" );
         			 break;
         		 }
-        		 ms.removeTrack(args[1], args[2]);
+        		 ms.removeRecord(args[1], args[2]);
                  break;
         	 case "-g":
-        		 ms.moveTrackAnotherGenre(args[1], args[2]);
+        		 ms.moveRecordAnotherSet(args[1], args[2]);
                  break;
         	 case "-p":
                  ms.printAllTracksTitle();

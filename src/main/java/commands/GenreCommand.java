@@ -1,5 +1,6 @@
 package commands;
 
+import interfaces.Command;
 import management.ManagementSystem;
 
 public class GenreCommand implements Command {

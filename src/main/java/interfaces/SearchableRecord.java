@@ -1,4 +1,4 @@
-package management;
+package interfaces;
 
 /**
  * Created by Morthanion on 22.10.2014.

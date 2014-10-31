@@ -1,10 +1,11 @@
 package musicLibrary;
 
+import interfaces.Record;
+import interfaces.SearchableRecord;
+
 import java.io.Serializable;
 
-import management.SearchableRecord;
-
-public class Track implements SearchableRecord, Serializable {
+public class Track implements SearchableRecord, Serializable, Record {
 
 	private static final long serialVersionUID = 1L;
 	private String trackTitle;
@@ -26,7 +27,10 @@ public class Track implements SearchableRecord, Serializable {
 	}
 
 	public void setGenre(String genre) {
-		this.genre = genre;
+		if ((genre == null)||(genre.equals("-")))
+			this.genre = "Unsorted";
+		else
+			this.genre = genre;
 	}
 	
 	public String getTrackTitle() {
@@ -44,7 +48,7 @@ public class Track implements SearchableRecord, Serializable {
 	}
 
 	public void setSinger(String singer) {
-		if (singer == null)
+		if ((singer == null)||(singer.equals("-")))
 			this.singer = "unknown";
 		else
 			this.singer = singer;
@@ -55,7 +59,7 @@ public class Track implements SearchableRecord, Serializable {
 	}
 
 	public void setAlbum(String album) {
-		if (album == null)
+		if ((album == null)||(album.equals("-")))
 			this.album = "unknown";
 		else
 			this.album = album;
@@ -66,19 +70,21 @@ public class Track implements SearchableRecord, Serializable {
 	}
 
 	public void setRecordLength(String recordLength) {
-		if (recordLength == null)
-			this.recordLength = "0.0";
+		if ((recordLength == null)||(recordLength.equals("-")))
+			this.recordLength = "unknown";
 		else
 			this.recordLength = recordLength;
 	}
 	
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 	       return sb.append("Title: \"").append(getTrackTitle()).append("\", Singer: \"").append(getSinger())
 	    		   .append("\", Album: \"").append(getAlbum()).append("\", Record length: ").append(getRecordLength())
 	    		   .append(", Genre: \"").append(getGenre()).append("\"").toString();
-}
+	}
 
+	@Override
 	 public boolean equals(Object obj){
 	     Track track = (Track)obj;
 	     if (track == this) 

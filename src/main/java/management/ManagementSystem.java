@@ -1,5 +1,10 @@
 package management;
 
+import interfaces.Library;
+import interfaces.Record;
+import interfaces.RecordsList;
+import interfaces.SearchableRecord;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,18 +19,17 @@ import java.util.Iterator;
 import java.util.List;
 
 import musicLibrary.Genre;
-import musicLibrary.Library;
+import musicLibrary.MusicLibrary;
 import musicLibrary.Track;
-
 import commands.CommandProcessor;
 
 public class ManagementSystem {
-	private Library library;
+	private Library musicLibrary;
     private String storage = "storage/.";
     private static ManagementSystem instance;
 
 	public ManagementSystem(){
-        this.library = new Library(loadGenres(storage));
+        this.musicLibrary = new MusicLibrary(loadGenres(storage));
     }
 
     public static synchronized ManagementSystem getInstance(){
@@ -35,8 +39,8 @@ public class ManagementSystem {
         return instance;
     }
     
-    public List<Genre> loadGenres(String storage){
-    	List<Genre> genres = new ArrayList<>();
+    public List<RecordsList> loadGenres(String storage){
+    	List<RecordsList> genres = new ArrayList<>();
     	try {
 			File dir = new File(storage);
 			for(String path : dir.list()){
@@ -50,26 +54,26 @@ public class ManagementSystem {
     }
     
     public void printAllTracksTitle(){
-    	for (Track track:library.getAllTracks())
+    	for (Record track:musicLibrary.getAllRecords())
     		System.out.println(track.getTrackTitle());
     }
 
 	public void getTracksTitles(String genreName){
     	try{
-    		for(Track track:library.getGenre(genreName).getTracks())
+    		for(Record track:musicLibrary.getRecordsList(genreName).getRecords())
     			System.out.println(track.getTrackTitle());
     	} catch (IllegalArgumentException e){
     		System.out.println(e.getMessage());
     	}
     }
     
-    public void moveTrackAnotherGenre(String trackTitle, String genreName){
+    public void moveRecordAnotherSet(String trackTitle, String genreName){
     	try{
-        	Track currentTrack = library.getTrack(trackTitle);
+    		Record currentTrack = musicLibrary.getRecord(trackTitle);
         	String oldGenre = currentTrack.getGenre();
         	currentTrack.setGenre(genreName);
-        	library.getGenre(genreName).insertTrack(currentTrack);
-        	library.getGenre(oldGenre).removeTrack(currentTrack);
+        	musicLibrary.getRecordsList(genreName).insertRecord(currentTrack);
+        	musicLibrary.getRecordsList(oldGenre).removeRecord(currentTrack);
         	System.out.println("Track " + trackTitle +" now belongs to the genre " + genreName);
     	} catch (IllegalArgumentException e){
     		System.out.println(e.getMessage());
@@ -78,7 +82,7 @@ public class ManagementSystem {
 
     public void printTrackInfo(String trackTitle){
     	try{
-    		Track track = library.getTrack(trackTitle);
+    		Record track = musicLibrary.getRecord(trackTitle);
     		System.out.println(track.toString());
     	} catch (IllegalArgumentException e){
     		System.out.println(e.getMessage());
@@ -87,10 +91,10 @@ public class ManagementSystem {
 	
 	public void insertTrack(String ... args) {
 		try{
-			Track newTrack = new Track(args[0], args[1], args[2], args[3], args[4]);
-			library.insertTrack(newTrack);
-			serialize("storage/"+newTrack.getGenre()+".bin", library.getGenre(newTrack.getGenre()).getTracks());
-			System.out.println("Successfully placed in storage: " + library.getGenre(newTrack.getGenre()).getGenreName());
+			Record newTrack = new Track(args[0], args[1], args[2], args[3], args[4]);
+			musicLibrary.insertRecord(newTrack);
+			serialize("storage/"+newTrack.getGenre()+".bin", musicLibrary.getRecordsList(newTrack.getGenre()).getRecords());
+			System.out.println("Successfully placed in storage: " + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
 		}catch (ArrayIndexOutOfBoundsException e){
 			System.out.println("Don't skip parameters, if don't no info - type \"-\"");
 		}catch (IOException e) {
@@ -99,7 +103,7 @@ public class ManagementSystem {
 	}
 	
 	public void setTrack(String trackTitle, String ... args) {
-		Track oldTrack = library.getTrack(trackTitle);
+		Record oldTrack = musicLibrary.getRecord(trackTitle);
 		if(args[0].equals("-"))
 			args[0] = oldTrack.getGenre();
 		if(args[1].equals("-"))
@@ -112,20 +116,20 @@ public class ManagementSystem {
 			args[4] = oldTrack.getRecordLength();
 
 		Track newTrack = new Track(args[0], args[1], args[2], args[3], args[4]);
-		library.setTrack(trackTitle, newTrack);
+		musicLibrary.setRecord(trackTitle, newTrack);
 		try{
-			serialize("storage/"+newTrack.getGenre()+".bin", library.getGenre(newTrack.getGenre()).getTracks());
-			System.out.println("Successfully placed in storage: " + library.getGenre(newTrack.getGenre()).getGenreName());
+			serialize("storage/"+newTrack.getGenre()+".bin", musicLibrary.getRecordsList(newTrack.getGenre()).getRecords());
+			System.out.println("Successfully placed in storage: " + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
 		}catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
 	}
 	
-    public void removeTrack(String trackTitle, String genreName){
+    public void removeRecord(String trackTitle, String genreName){
     	try{
-        	Track currentTrack = library.getGenre(genreName).getTrack(trackTitle);
-        	library.getGenre(genreName).removeTrack(currentTrack);
-			serialize("storage/"+genreName+".bin", library.getGenre(genreName).getTracks());
+    		Record currentTrack = musicLibrary.getRecordsList(genreName).getRecord(trackTitle);
+    		musicLibrary.removeRecord(genreName, currentTrack);
+			serialize("storage/"+genreName+".bin", musicLibrary.getRecordsList(genreName).getRecords());
 			System.out.println("Track " + trackTitle +" has been removed ");
     	} catch (IllegalArgumentException | IOException e){
     		System.out.println(e.getMessage());
@@ -139,16 +143,16 @@ public class ManagementSystem {
     public Collection<SearchableRecord> searchItems(String mask)
     {
         Collection<SearchableRecord> fits = new ArrayList<SearchableRecord>();
-        Iterator<Track> trackIterator = library.getAllTracks().iterator();
-        Iterator<Genre> genreIterator = library.getGenres().iterator();
+        Iterator<Record> trackIterator = musicLibrary.getAllRecords().iterator();
+        Iterator<RecordsList> genreIterator = musicLibrary.getRecordsLists().iterator();
         while (trackIterator.hasNext())
         {
-            SearchableRecord checked = trackIterator.next();
+            SearchableRecord checked = (Track)trackIterator.next();
             if (checked.fitsMask(mask)) fits.add(checked);
         }
         while (genreIterator.hasNext())
         {
-            SearchableRecord checked = genreIterator.next();
+            SearchableRecord checked = (Genre)genreIterator.next();
             if (checked.fitsMask(mask)) fits.add(checked);
         }
         return fits;
