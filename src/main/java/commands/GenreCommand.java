@@ -1,5 +1,7 @@
 package commands;
 
+import java.util.TreeSet;
+
 import interfaces.Command;
 import management.ManagementSystem;
 import output.DisplaySystem;
@@ -7,36 +9,41 @@ import output.DisplaySystem;
 public class GenreCommand implements Command {
 
 	ManagementSystem ms;
+	private DisplaySystem ds;
+	
+    public GenreCommand() {
+		this.ds = DisplaySystem.getInstance();
+		this.ms = ManagementSystem.getInstance();
+	}
 	
 	@Override
 	public boolean execute(String... args) {
-		ms = ManagementSystem.getInstance();
 		 if (args == null) {
-    		 System.out.println("You must specify the parameter. Type \"help genre\" to view available" );
+			 ds.DisplayMessage("You must specify the parameter. Type \"help genre\" to view available" );
 		 } else {
         	 String command = args[0];
-        	 String genreName;
         	 switch(command){
         	 case "-a":
-        		 genreName = args[1];
-                 DisplaySystem.getInstance().DisplayMessage("The option \"add genre into list\" is not ready yet");
+        		 ms.setRecordsList(args[1]); 
                  break;
         	 case "-r":
-        		 genreName = args[1];
-                 DisplaySystem.getInstance().DisplayMessage("The option \"remove genre from list\" is not ready yet");
+        		 ms.removeRecordsList(args[1]);; 
                  break;
-        	 case "-g":
-        		 genreName = args[1];
-                 DisplaySystem.getInstance().DisplayMessage("The option \"get all tracks this genre\" is not ready yet");
+        	 case "-c":
+        		 if((args.length -1 < 3)){
+            		 ds.DisplayMessage("The option \"combine genres\" need parameters \"genre1 name\" \"genre2 name\" \"new genre name\"");
+        		 }
+        		 ms.combineRecordsLists(args[1], args[2], args[3]);
                  break;
         	 case "-p":
         		 if((args.length -1 == 0)){
-                     DisplaySystem.getInstance().DisplayMessage("The option \"print genre list\" is not ready yet");
-        		 }else
+        			 ms.getRecordsListsName();
+        		 }else{
         			 ms.getTracksTitles(args[1]);
+        		 }
                  break;
            	 default:
-                 DisplaySystem.getInstance().DisplayMessage("Parameter <" + command + "> didn't defined");
+           		 ds.DisplayMessage("Parameter <" + command + "> didn't defined");
         	 }
 		 }
 		return true;
@@ -44,11 +51,13 @@ public class GenreCommand implements Command {
 
 	@Override
 	public void printHelp() {
-        DisplaySystem.getInstance().DisplayMessage(
-				"-a [new genre name]	add genre into list \r\n" +
-				"-r [genre name]		remove genre from list \r\n" +
-				"-p [genre name]		print all tracks of this genre \r\n" +
-				"-p			print genre list");
+		 ds.DisplayMessage(
+				"-a \"new genre name\"				add genre into list \r\n" +
+				"-r \"genre name\"					remove genre from list \r\n" +
+				"						attention, the operation remove genre also moves all tracks belong to it to Unsorted\r\n" +
+				"-c \"genre1 name\" \"genre2 name\" \"new genre name\"	combine genres \r\n" +
+				"-p \"genre name\"		 			print all tracks of this genre \r\n" +
+				"-p						print genre list");
 		
 	}
 

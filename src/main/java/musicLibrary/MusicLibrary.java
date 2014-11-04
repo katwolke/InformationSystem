@@ -4,7 +4,6 @@ import interfaces.Library;
 import interfaces.Listener;
 import interfaces.Record;
 import interfaces.RecordsList;
-import management.ManagementSystem;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,5 +103,19 @@ public class MusicLibrary implements Library{
 	public void removeRecord(String genreName, Record currentTrack) {
 		getRecordsList(genreName).removeRecord(currentTrack);
         this.notifyListeners("Operation successful");
+	}
+	
+	@Override
+	public void removeRecordsList(String genreName) {
+		genres.remove(getRecordsList(genreName));
+	}
+	
+	public void setRecordsList(String newGenreName){
+		for(RecordsList genre:genres)
+			if(genre.getRecordsListName().equalsIgnoreCase(newGenreName))
+				throw new IllegalArgumentException("Genre, with name <" + newGenreName + "> already exist");
+			
+			Collection<Record> newGenreTracks = new HashSet<>();
+			genres.add(new Genre(newGenreName, newGenreTracks));
 	}
 }

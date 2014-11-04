@@ -11,5 +11,7 @@ public interface Library {
 	public void setRecord(String recordTitle, Record newRecord);
 	public void insertRecord(Record newRecord);
 	public void removeRecord(String RecordsListName, Record record);
+	void removeRecordsList(String recordListName);
+	public void setRecordsList(String RecordsListName);
 
 }
