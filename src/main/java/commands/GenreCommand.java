@@ -2,6 +2,7 @@ package commands;
 
 import interfaces.Command;
 import management.ManagementSystem;
+import output.DisplaySystem;
 
 public class GenreCommand implements Command {
 
@@ -18,24 +19,24 @@ public class GenreCommand implements Command {
         	 switch(command){
         	 case "-a":
         		 genreName = args[1];
-        		 System.out.println("The option \"add genre into list\" is not ready yet"); 
+                 DisplaySystem.getInstance().DisplayMessage("The option \"add genre into list\" is not ready yet");
                  break;
         	 case "-r":
         		 genreName = args[1];
-        		 System.out.println("The option \"remove genre from list\" is not ready yet"); 
+                 DisplaySystem.getInstance().DisplayMessage("The option \"remove genre from list\" is not ready yet");
                  break;
         	 case "-g":
         		 genreName = args[1];
-        		 System.out.println("The option \"get all tracks this genre\" is not ready yet");
+                 DisplaySystem.getInstance().DisplayMessage("The option \"get all tracks this genre\" is not ready yet");
                  break;
         	 case "-p":
         		 if((args.length -1 == 0)){
-        		 System.out.println("The option \"print genre list\" is not ready yet");
+                     DisplaySystem.getInstance().DisplayMessage("The option \"print genre list\" is not ready yet");
         		 }else
         			 ms.getTracksTitles(args[1]);
                  break;
            	 default:
-        		 System.out.println("Parameter <" + command + "> didn't defined");
+                 DisplaySystem.getInstance().DisplayMessage("Parameter <" + command + "> didn't defined");
         	 }
 		 }
 		return true;
@@ -43,7 +44,7 @@ public class GenreCommand implements Command {
 
 	@Override
 	public void printHelp() {
-		System.out.println(
+        DisplaySystem.getInstance().DisplayMessage(
 				"-a [new genre name]	add genre into list \r\n" +
 				"-r [genre name]		remove genre from list \r\n" +
 				"-p [genre name]		print all tracks of this genre \r\n" +

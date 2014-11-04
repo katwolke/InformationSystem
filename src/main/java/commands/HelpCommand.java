@@ -1,6 +1,7 @@
 package commands;
 
 import interfaces.Command;
+import output.DisplaySystem;
 
 import java.util.Map;
 
@@ -14,21 +15,21 @@ class HelpCommand implements Command {
     @Override
     public boolean execute(String... args) {
         if (args == null) {
-            System.out.println("Available commands:\n" + LINE_DELIMITER);
+            DisplaySystem.getInstance().DisplayMessage("Available commands:\n" + LINE_DELIMITER);
             for (Command cmd : commands.values()) {
-                System.out.println(cmd.getName() + ": " + cmd.getDescription());
+                DisplaySystem.getInstance().DisplayMessage(cmd.getName() + ": " + cmd.getDescription());
             }
             System.out.println(LINE_DELIMITER);
         } else {
             for (String cmd : args) {
-                System.out.println("Help for command " + cmd + ":\n" + LINE_DELIMITER);
+                DisplaySystem.getInstance().DisplayMessage("Help for command " + cmd + ":\n" + LINE_DELIMITER);
                 Command command = commands.get(cmd.toUpperCase());
                 if (command == null) {
-                    System.out.println(COMMAND_NOT_FOUND);
+                    DisplaySystem.getInstance().DisplayMessage(COMMAND_NOT_FOUND);
                 } else {
                     command.printHelp();
                 }
-                System.out.println(LINE_DELIMITER);
+                DisplaySystem.getInstance().DisplayMessage(LINE_DELIMITER);
             }
         }
         return true;
@@ -36,7 +37,7 @@ class HelpCommand implements Command {
 
     @Override
     public void printHelp() {
-        System.out.println(getDescription());
+        DisplaySystem.getInstance().DisplayMessage(getDescription());
     }
 
     @Override

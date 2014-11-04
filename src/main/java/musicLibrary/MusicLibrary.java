@@ -1,26 +1,43 @@
 package musicLibrary;
 
 import interfaces.Library;
+import interfaces.Listener;
 import interfaces.Record;
 import interfaces.RecordsList;
+import management.ManagementSystem;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
 public class MusicLibrary implements Library{
 	private List<RecordsList> genres;
-
+    private Collection<Listener> listeners;
 	public MusicLibrary(List<RecordsList> genres) {
 		this.genres = genres;
+        this.listeners = new ArrayList<Listener>();
 	}
 	
 	public List<RecordsList> getRecordsLists(){
 		return genres;
-    	
+
     }
-	
-	@Override
+
+    public void AddListener(Listener listener)
+    {
+        this.listeners.add(listener);
+    }
+
+    private void notifyListeners(Object arg)
+    {
+        for(Listener listener: listeners)
+        {
+            listener.doEvent(arg);
+        }
+    }
+
+    @Override
 	public Collection<Record> getAllRecords(){
 		 Collection<Record> allTracks = new HashSet<>();
 	    	for(RecordsList genre:genres){
@@ -62,6 +79,7 @@ public class MusicLibrary implements Library{
 		Record track = getRecord(trackTitle);
 		RecordsList genre = getRecordsList(track.getGenre());
 		genre.setRecord(trackTitle, newTrack);
+        this.notifyListeners("Operation successful");
 	}
 	
 	@Override
@@ -79,11 +97,12 @@ public class MusicLibrary implements Library{
 			newGenreTracks.add(newTrack);
 			genres.add(new Genre(newTrack.getGenre(), newGenreTracks));
 		}
+        this.notifyListeners("Operation successful");
 	}
 
 	@Override
 	public void removeRecord(String genreName, Record currentTrack) {
 		getRecordsList(genreName).removeRecord(currentTrack);
-		
+        this.notifyListeners("Operation successful");
 	}
 }

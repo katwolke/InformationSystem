@@ -1,6 +1,7 @@
 package commands;
 
 import interfaces.Command;
+import output.DisplaySystem;
 
 import java.util.Map;
 
@@ -16,7 +17,7 @@ class ExitCommand implements Command {
 
     @Override
     public void printHelp() {
-        System.out.println(getDescription());
+        DisplaySystem.getInstance().DisplayMessage(getDescription());
     }
 
     @Override

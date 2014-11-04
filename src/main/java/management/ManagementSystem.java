@@ -1,9 +1,6 @@
 package management;
 
-import interfaces.Library;
-import interfaces.Record;
-import interfaces.RecordsList;
-import interfaces.SearchableRecord;
+import interfaces.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,14 +19,17 @@ import musicLibrary.Genre;
 import musicLibrary.MusicLibrary;
 import musicLibrary.Track;
 import commands.CommandProcessor;
+import output.DisplaySystem;
 
-public class ManagementSystem {
+public class ManagementSystem implements Listener {
 	private Library musicLibrary;
     private String storage = "storage/.";
     private static ManagementSystem instance;
 
 	public ManagementSystem(){
-        this.musicLibrary = new MusicLibrary(loadGenres(storage));
+        MusicLibrary library = new MusicLibrary(loadGenres(storage));
+        library.AddListener(this);
+        this.musicLibrary = library;
     }
 
     public static synchronized ManagementSystem getInstance(){
@@ -48,22 +48,23 @@ public class ManagementSystem {
 					genres.add(new Genre(path.substring(0, path.lastIndexOf('.')), (HashSet)deserialize("storage/"+ path, HashSet.class)));
 			}
 		} catch (ClassNotFoundException | IOException e) {
-			System.out.println(e.getMessage());
+			DisplaySystem.getInstance().DisplayMessage(e.getMessage());
 		} 
 		return genres;
     }
     
     public void printAllTracksTitle(){
-    	for (Record track:musicLibrary.getAllRecords())
-    		System.out.println(track.getTrackTitle());
+    	/*for (Record track:))
+    		System.out.println(track.getTrackTitle());*/
+        DisplaySystem.getInstance().DisplayList(musicLibrary.getAllRecords());
     }
 
 	public void getTracksTitles(String genreName){
     	try{
     		for(Record track:musicLibrary.getRecordsList(genreName).getRecords())
-    			System.out.println(track.getTrackTitle());
+                DisplaySystem.getInstance().DisplayMessage(track.getTrackTitle());
     	} catch (IllegalArgumentException e){
-    		System.out.println(e.getMessage());
+            DisplaySystem.getInstance().DisplayMessage(e.getMessage());
     	}
     }
     
@@ -76,33 +77,35 @@ public class ManagementSystem {
         	musicLibrary.getRecordsList(oldGenre).removeRecord(currentTrack);
         	System.out.println("Track " + trackTitle +" now belongs to the genre " + genreName);
     	} catch (IllegalArgumentException e){
-    		System.out.println(e.getMessage());
+            DisplaySystem.getInstance().DisplayMessage(e.getMessage());
     	}
     }
 
     public void printTrackInfo(String trackTitle){
     	try{
     		Record track = musicLibrary.getRecord(trackTitle);
-    		System.out.println(track.toString());
+            DisplaySystem.getInstance().DisplayMessage(track.toString());
     	} catch (IllegalArgumentException e){
-    		System.out.println(e.getMessage());
+            DisplaySystem.getInstance().DisplayMessage(e.getMessage());
     	}
     }
 	
 	public void insertTrack(String ... args) {
 		try{
+            DisplaySystem.getInstance().DisplayMessage("Inserting track...");
 			Record newTrack = new Track(args[0], args[1], args[2], args[3], args[4]);
 			musicLibrary.insertRecord(newTrack);
 			serialize("storage/"+newTrack.getGenre()+".bin", musicLibrary.getRecordsList(newTrack.getGenre()).getRecords());
-			System.out.println("Successfully placed in storage: " + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
+            DisplaySystem.getInstance().DisplayMessage("Successfully placed in storage: " + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
 		}catch (ArrayIndexOutOfBoundsException e){
-			System.out.println("Don't skip parameters, if don't no info - type \"-\"");
+            DisplaySystem.getInstance().DisplayMessage("Don't skip parameters, if don't no info - type \"-\"");
 		}catch (IOException e) {
-			System.out.println(e.getMessage());
+			DisplaySystem.getInstance().DisplayMessage(e.getMessage());
 		}
 	}
 	
 	public void setTrack(String trackTitle, String ... args) {
+        DisplaySystem.getInstance().DisplayMessage("Adding track...");
 		Record oldTrack = musicLibrary.getRecord(trackTitle);
 		if(args[0].equals("-"))
 			args[0] = oldTrack.getGenre();
@@ -119,20 +122,21 @@ public class ManagementSystem {
 		musicLibrary.setRecord(trackTitle, newTrack);
 		try{
 			serialize("storage/"+newTrack.getGenre()+".bin", musicLibrary.getRecordsList(newTrack.getGenre()).getRecords());
-			System.out.println("Successfully placed in storage: " + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
+            DisplaySystem.getInstance().DisplayMessage("Successfully placed in storage: " + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
 		}catch (IOException e) {
-			System.out.println(e.getMessage());
+            DisplaySystem.getInstance().DisplayMessage(e.getMessage());
 		}
 	}
 	
     public void removeRecord(String trackTitle, String genreName){
     	try{
+            DisplaySystem.getInstance().DisplayMessage("Removing track...");
     		Record currentTrack = musicLibrary.getRecordsList(genreName).getRecord(trackTitle);
     		musicLibrary.removeRecord(genreName, currentTrack);
 			serialize("storage/"+genreName+".bin", musicLibrary.getRecordsList(genreName).getRecords());
-			System.out.println("Track " + trackTitle +" has been removed ");
+            DisplaySystem.getInstance().DisplayMessage("Track " + trackTitle + " has been removed ");
     	} catch (IllegalArgumentException | IOException e){
-    		System.out.println(e.getMessage());
+            DisplaySystem.getInstance().DisplayMessage(e.getMessage());
     	}
     }
 
@@ -175,8 +179,8 @@ public class ManagementSystem {
     public static void main(String[] args){
     	System.setProperty("file.encoding","UTF-8");
     	System.setProperty("console.encoding","Cp866");
-    	System.out.println("Welcome to the information system \"Music Library\" \r\n"
-				+ "To get instructions on how to use enter command \"help\"");
+        DisplaySystem.getInstance().DisplayMessage("Welcome to the information system \"Music Library\" \r\n"
+                + "To get instructions on how to use enter command \"help\"");
     	getInstance();
     	
     	String consoleEncoding = System.getProperty("console.encoding");
@@ -190,5 +194,10 @@ public class ManagementSystem {
     	CommandProcessor cp = new CommandProcessor(System.getProperty("console.encoding"));
         cp.execute();
     }
-    
+
+    @Override
+    public void doEvent(Object arg) {
+       if (arg.getClass().equals(String.class)) DisplaySystem.getInstance().DisplayMessage((String)arg);
+       if (arg instanceof Exception) DisplaySystem.getInstance().DisplayError((Exception) arg);
+    }
 }

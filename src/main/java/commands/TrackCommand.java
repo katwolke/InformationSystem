@@ -5,6 +5,7 @@ import interfaces.Command;
 import java.util.logging.Logger;
 
 import management.ManagementSystem;
+import output.DisplaySystem;
 
 class TrackCommand implements Command {
 	
@@ -21,14 +22,14 @@ class TrackCommand implements Command {
         	 switch(command){
         	 case "-i":
         		 if((args.length -1 == 0)){
-        			 System.out.println("Enter track title to process" );
+                     DisplaySystem.getInstance().DisplayMessage("Enter track title to process" );
         			 break;
         		 }
         		 ms.printTrackInfo(args[1]); 
                  break;
         	 case "-s":
         		 if((args.length -1 == 0)){
-        			 System.out.println("Enter track title and parameters with new values to process" );
+                     DisplaySystem.getInstance().DisplayMessage("Enter track title and parameters with new values to process" );
         			 break;
         		 }
         		 String[] setArgs = { "-", args[1], "-", "-", "-"};
@@ -55,7 +56,7 @@ class TrackCommand implements Command {
                  break;
         	 case "-a":
         		 if((args.length -1 == 0)){
-        			 System.out.println("Enter parameters, \r\n" +
+                     DisplaySystem.getInstance().DisplayMessage("Enter parameters, \r\n" +
         			 		"Example: -a \"genre\" \"title\" \"singer\" \"Album\" Record length" );
         			 break;
         		 }
@@ -65,7 +66,7 @@ class TrackCommand implements Command {
                  break;
         	 case "-r":
         		 if((args.length -1 == 0)){
-        			 System.out.println("Enter track title and genre to remove" );
+                     DisplaySystem.getInstance().DisplayMessage("Enter track title and genre to remove" );
         			 break;
         		 }
         		 ms.removeRecord(args[1], args[2]);
@@ -85,7 +86,7 @@ class TrackCommand implements Command {
 
     @Override
     public void printHelp() {
-        System.out.println(
+        DisplaySystem.getInstance().DisplayMessage(
         		"-i \"track title\"				get track info \r\n" +
         		"-s \"track title\" \"parameter\" \"new value\"	set track info, you can change several parameters at once, \r\n" +
         		"						use the key -g to set track genre, please \r\n" +
