@@ -1,18 +1,21 @@
 package output;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Collection;
 import interfaces.Record;
+
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Created by Morthanion on 31.10.2014.
  */
 public class DisplaySystem {
-    private static DisplaySystem instance = new DisplaySystem();
+    private static DisplaySystem instance;
     private DisplaySystem(){}
     public static DisplaySystem getInstance()
     {
+    	 if (instance == null) {
+             instance = new DisplaySystem();
+         }
         return instance;
     }
     public void DisplayMessage(String message)

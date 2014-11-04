@@ -24,12 +24,14 @@ import output.DisplaySystem;
 public class ManagementSystem implements Listener {
 	private Library musicLibrary;
     private String storage = "storage/.";
+	private static DisplaySystem ds;
     private static ManagementSystem instance;
 
 	public ManagementSystem(){
         MusicLibrary library = new MusicLibrary(loadGenres(storage));
         library.AddListener(this);
         this.musicLibrary = library;
+        this.ds = DisplaySystem.getInstance();
     }
 
     public static synchronized ManagementSystem getInstance(){
@@ -48,7 +50,7 @@ public class ManagementSystem implements Listener {
 					genres.add(new Genre(path.substring(0, path.lastIndexOf('.')), (HashSet)deserialize("storage/"+ path, HashSet.class)));
 			}
 		} catch (ClassNotFoundException | IOException e) {
-			DisplaySystem.getInstance().DisplayMessage(e.getMessage());
+			ds.DisplayMessage(e.getMessage());
 		} 
 		return genres;
     }
@@ -56,15 +58,15 @@ public class ManagementSystem implements Listener {
     public void printAllTracksTitle(){
     	/*for (Record track:))
     		System.out.println(track.getTrackTitle());*/
-        DisplaySystem.getInstance().DisplayList(musicLibrary.getAllRecords());
+    	ds.DisplayList(musicLibrary.getAllRecords());
     }
 
 	public void getTracksTitles(String genreName){
     	try{
     		for(Record track:musicLibrary.getRecordsList(genreName).getRecords())
-                DisplaySystem.getInstance().DisplayMessage(track.getTrackTitle());
+    			ds.DisplayMessage(track.getTrackTitle());
     	} catch (IllegalArgumentException e){
-            DisplaySystem.getInstance().DisplayMessage(e.getMessage());
+    		ds.DisplayMessage(e.getMessage());
     	}
     }
     
@@ -77,35 +79,35 @@ public class ManagementSystem implements Listener {
         	musicLibrary.getRecordsList(oldGenre).removeRecord(currentTrack);
         	System.out.println("Track " + trackTitle +" now belongs to the genre " + genreName);
     	} catch (IllegalArgumentException e){
-            DisplaySystem.getInstance().DisplayMessage(e.getMessage());
+    		ds.DisplayMessage(e.getMessage());
     	}
     }
 
     public void printTrackInfo(String trackTitle){
     	try{
     		Record track = musicLibrary.getRecord(trackTitle);
-            DisplaySystem.getInstance().DisplayMessage(track.toString());
+    		ds.DisplayMessage(track.toString());
     	} catch (IllegalArgumentException e){
-            DisplaySystem.getInstance().DisplayMessage(e.getMessage());
+    		ds.DisplayMessage(e.getMessage());
     	}
     }
 	
 	public void insertTrack(String ... args) {
 		try{
-            DisplaySystem.getInstance().DisplayMessage("Inserting track...");
+			ds.DisplayMessage("Inserting track...");
 			Record newTrack = new Track(args[0], args[1], args[2], args[3], args[4]);
 			musicLibrary.insertRecord(newTrack);
 			serialize("storage/"+newTrack.getGenre()+".bin", musicLibrary.getRecordsList(newTrack.getGenre()).getRecords());
-            DisplaySystem.getInstance().DisplayMessage("Successfully placed in storage: " + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
+			ds.DisplayMessage("Successfully placed in storage: " + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
 		}catch (ArrayIndexOutOfBoundsException e){
-            DisplaySystem.getInstance().DisplayMessage("Don't skip parameters, if don't no info - type \"-\"");
+			ds.DisplayMessage("Don't skip parameters, if don't no info - type \"-\"");
 		}catch (IOException e) {
-			DisplaySystem.getInstance().DisplayMessage(e.getMessage());
+			ds.DisplayMessage(e.getMessage());
 		}
 	}
 	
 	public void setTrack(String trackTitle, String ... args) {
-        DisplaySystem.getInstance().DisplayMessage("Adding track...");
+		ds.DisplayMessage("Adding track...");
 		Record oldTrack = musicLibrary.getRecord(trackTitle);
 		if(args[0].equals("-"))
 			args[0] = oldTrack.getGenre();
@@ -122,21 +124,21 @@ public class ManagementSystem implements Listener {
 		musicLibrary.setRecord(trackTitle, newTrack);
 		try{
 			serialize("storage/"+newTrack.getGenre()+".bin", musicLibrary.getRecordsList(newTrack.getGenre()).getRecords());
-            DisplaySystem.getInstance().DisplayMessage("Successfully placed in storage: " + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
+			ds.DisplayMessage("Successfully placed in storage: " + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
 		}catch (IOException e) {
-            DisplaySystem.getInstance().DisplayMessage(e.getMessage());
+			ds.DisplayMessage(e.getMessage());
 		}
 	}
 	
     public void removeRecord(String trackTitle, String genreName){
     	try{
-            DisplaySystem.getInstance().DisplayMessage("Removing track...");
+    		ds.DisplayMessage("Removing track...");
     		Record currentTrack = musicLibrary.getRecordsList(genreName).getRecord(trackTitle);
     		musicLibrary.removeRecord(genreName, currentTrack);
 			serialize("storage/"+genreName+".bin", musicLibrary.getRecordsList(genreName).getRecords());
-            DisplaySystem.getInstance().DisplayMessage("Track " + trackTitle + " has been removed ");
+			ds.DisplayMessage("Track " + trackTitle + " has been removed ");
     	} catch (IllegalArgumentException | IOException e){
-            DisplaySystem.getInstance().DisplayMessage(e.getMessage());
+    		ds.DisplayMessage(e.getMessage());
     	}
     }
 
@@ -177,27 +179,27 @@ public class ManagementSystem implements Listener {
 	}
 
     public static void main(String[] args){
+    	getInstance();
     	System.setProperty("file.encoding","UTF-8");
     	System.setProperty("console.encoding","Cp866");
-        DisplaySystem.getInstance().DisplayMessage("Welcome to the information system \"Music Library\" \r\n"
+    	ds.DisplayMessage("Welcome to the information system \"Music Library\" \r\n"
                 + "To get instructions on how to use enter command \"help\"");
-    	getInstance();
     	
     	String consoleEncoding = System.getProperty("console.encoding");
     	if (consoleEncoding != null) {
     	    try {
     	        System.setOut(new PrintStream(System.out, true, consoleEncoding));
     	    } catch (java.io.UnsupportedEncodingException ex) {
-    	        System.err.println("Unsupported encoding set for console: "+consoleEncoding);
+    	    	ds.DisplayMessage("Unsupported encoding set for console: "+consoleEncoding);
     	    }
     	}
-    	CommandProcessor cp = new CommandProcessor(System.getProperty("console.encoding"));
+    	CommandProcessor cp = new CommandProcessor(ds, System.getProperty("console.encoding"));
         cp.execute();
     }
 
     @Override
     public void doEvent(Object arg) {
-       if (arg.getClass().equals(String.class)) DisplaySystem.getInstance().DisplayMessage((String)arg);
-       if (arg instanceof Exception) DisplaySystem.getInstance().DisplayError((Exception) arg);
+       if (arg.getClass().equals(String.class)) ds.DisplayMessage((String)arg);
+       if (arg instanceof Exception) ds.DisplayError((Exception) arg);
     }
 }

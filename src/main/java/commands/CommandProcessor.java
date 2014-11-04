@@ -9,6 +9,8 @@ import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import output.DisplaySystem;
  
 /**
  * @author Ksiona
@@ -17,10 +19,10 @@ import java.util.regex.Pattern;
 public class CommandProcessor {
 	 
     private Map<String, Command> commands;
- 
+	private static DisplaySystem ds;
     private String consoleEncoding;
  
-    public CommandProcessor(String consoleEncoding) {
+    public CommandProcessor(DisplaySystem ds, String consoleEncoding) {
         commands = new TreeMap<>();
         Command cmd = new HelpCommand(commands);
         commands.put(cmd.getName(), cmd);
@@ -31,6 +33,7 @@ public class CommandProcessor {
         cmd = new ExitCommand();
         commands.put(cmd.getName(), cmd);
         this.consoleEncoding = consoleEncoding;
+        this.ds = DisplaySystem.getInstance();
     }
  
     public void execute() {
@@ -38,7 +41,7 @@ public class CommandProcessor {
         Scanner scanner = new Scanner(System.in, consoleEncoding);
         do {
         	
-            System.out.print("> ");
+        	ds.DisplayMessage("> ");
             String fullCommand = scanner.nextLine();
             if (fullCommand == null || "".equals(fullCommand)) {
                 continue;
