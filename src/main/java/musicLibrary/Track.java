@@ -1,11 +1,11 @@
 package musicLibrary;
 
 import interfaces.Record;
-import interfaces.SearchableRecord;
 
 import java.io.Serializable;
+import java.util.regex.Pattern;
 
-public class Track implements SearchableRecord, Serializable, Record {
+public class Track implements Serializable, Record {
 
 	private static final long serialVersionUID = 1L;
 	private String trackTitle;
@@ -107,8 +107,27 @@ public class Track implements SearchableRecord, Serializable, Record {
 	 }
 
     @Override
-    public boolean fitsMask(String mask) {
-    //TODO realization
-        return false;
+    public boolean fitsMask(String KeyField, String mask) {
+        String checked = null;
+        switch(KeyField.toLowerCase().charAt(0)){
+            case 'a':
+                checked = this.getAlbum();
+                break;
+            case 'g':
+                checked = this.getGenre();
+                break;
+            case 't':
+                checked = this.getTrackTitle();
+                break;
+            case 'l':
+                checked = this.getRecordLength();
+                break;
+            case 's':
+                checked = this.getSinger();
+                break;
+            }
+        String regexMask = mask.replace("*",".*");
+        regexMask = regexMask.replace("?", ".");
+        return Pattern.matches(regexMask.toLowerCase(), checked.toLowerCase());
     }
 }

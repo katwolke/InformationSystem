@@ -30,6 +30,8 @@ public class CommandProcessor {
         commands.put(cmd.getName(), cmd);
         cmd = new GenreCommand();
         commands.put(cmd.getName(), cmd);
+        cmd = new SearchCommand();
+        commands.put(cmd.getName(), cmd);
         cmd = new ExitCommand();
         commands.put(cmd.getName(), cmd);
         this.consoleEncoding = consoleEncoding;
@@ -41,7 +43,7 @@ public class CommandProcessor {
         Scanner scanner = new Scanner(System.in, consoleEncoding);
         do {
         	
-        	ds.DisplayMessage("> ");
+        	ds.DisplaySymbols("> ");
             String fullCommand = scanner.nextLine();
             if (fullCommand == null || "".equals(fullCommand)) {
                 continue;
@@ -52,7 +54,7 @@ public class CommandProcessor {
             }
             Command cmd = commands.get(parser.command.toUpperCase());
             if (cmd == null) {
-                System.out.println("Command not found");
+                DisplaySystem.getInstance().DisplayMessage("Command not found");
                 continue;
             }
             result = cmd.execute(parser.args);

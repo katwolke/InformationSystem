@@ -11,4 +11,5 @@ public interface Record {
 	public void setAlbum(String album);
 	public String getRecordLength();
 	public void setRecordLength(String recordLength);
+    public boolean fitsMask(String KeyField, String mask);
 }

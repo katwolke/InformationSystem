@@ -2,12 +2,11 @@ package musicLibrary;
 
 import interfaces.Record;
 import interfaces.RecordsList;
-import interfaces.SearchableRecord;
 
 import java.io.Serializable;
 import java.util.Collection;
 
-public class Genre implements SearchableRecord, Serializable, RecordsList{
+public class Genre implements Serializable, RecordsList{
 
 	private static final long serialVersionUID = 1L;
     private Collection<Record> tracks;
@@ -70,9 +69,4 @@ public class Genre implements SearchableRecord, Serializable, RecordsList{
 		this.genreName = genreName;
 	}
 
-    @Override
-    public boolean fitsMask(String mask) {
-    //TODO realization
-        return false;
-    }
 }

@@ -22,13 +22,17 @@ public class DisplaySystem {
     {
         System.out.println(message);
     }
+    public void DisplaySymbols(String symbols)
+    {
+        System.out.print(symbols);
+    }
     public void DisplayError(Exception e)
     {
         System.out.println("Error: "+e.getMessage());
     }
         public void DisplayList(Collection<Record> list) {
               System.out.printf("%-30s %-9s %-30s %-20s %-20s%n",
-                "Name",
+                "Title",
                 " | "+"Length",
                 " | "+"Album",
                 " | "+"Genre",

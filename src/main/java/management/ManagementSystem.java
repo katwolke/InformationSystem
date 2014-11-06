@@ -211,22 +211,16 @@ public class ManagementSystem implements Listener {
      * Not sure about Collection<SearchableRecord>
      *     may be separate search in genres/tracks???
      */
-    public Collection<SearchableRecord> searchItems(String mask)
+    public void searchItems(String keyField, String mask)
     {
-        Collection<SearchableRecord> fits = new ArrayList<SearchableRecord>();
+        Collection<Record> fits = new ArrayList<Record>();
         Iterator<Record> trackIterator = musicLibrary.getAllRecords().iterator();
-        Iterator<RecordsList> genreIterator = musicLibrary.getRecordsLists().iterator();
         while (trackIterator.hasNext())
         {
-            SearchableRecord checked = (Track)trackIterator.next();
-            if (checked.fitsMask(mask)) fits.add(checked);
+            Record checked = trackIterator.next();
+            if (checked.fitsMask(keyField, mask)) fits.add(checked);
         }
-        while (genreIterator.hasNext())
-        {
-            SearchableRecord checked = (Genre)genreIterator.next();
-            if (checked.fitsMask(mask)) fits.add(checked);
-        }
-        return fits;
+        DisplaySystem.getInstance().DisplayList(fits);
     }
     
     private static void serialize(String fileName, Object obj) throws IOException{
