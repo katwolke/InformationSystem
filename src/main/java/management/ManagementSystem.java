@@ -22,6 +22,9 @@ import commands.CommandProcessor;
 import output.DisplaySystem;
 
 public class ManagementSystem implements Listener {
+	
+	private static String WRITING_TO_FILE_SUCCESS = "Successfully placed in storage: ";
+	private static String REMOVE_FILE_SUCCESS = "Successfully remove storage: ";
 	private Library musicLibrary;
     private String storage = "storage/.";
 	private static DisplaySystem ds;
@@ -97,7 +100,7 @@ public class ManagementSystem implements Listener {
 			Record newTrack = new Track(args[0], args[1], args[2], args[3], args[4]);
 			musicLibrary.insertRecord(newTrack);
 			serialize("storage/"+newTrack.getGenre()+".bin", musicLibrary.getRecordsList(newTrack.getGenre()).getRecords());
-			ds.DisplayMessage("Successfully placed in storage: " + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
+			ds.DisplayMessage(WRITING_TO_FILE_SUCCESS + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
 		}catch (ArrayIndexOutOfBoundsException e){
 			ds.DisplayMessage("Don't skip parameters, if don't no info - type \"-\"");
 		}catch (IOException e) {
@@ -123,7 +126,7 @@ public class ManagementSystem implements Listener {
 		musicLibrary.setRecord(trackTitle, newTrack);
 		try{
 			serialize("storage/"+newTrack.getGenre()+".bin", musicLibrary.getRecordsList(newTrack.getGenre()).getRecords());
-			ds.DisplayMessage("Successfully placed in storage: " + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
+			ds.DisplayMessage(WRITING_TO_FILE_SUCCESS + musicLibrary.getRecordsList(newTrack.getGenre()).getRecordsListName());
 		}catch (IOException e) {
 			ds.DisplayError(e);
 		}
@@ -145,7 +148,7 @@ public class ManagementSystem implements Listener {
 		try{
 			musicLibrary.setRecordsList(newGenreName);
 			serialize("storage/"+newGenreName+".bin", musicLibrary.getRecordsList(newGenreName).getRecords());
-			ds.DisplayMessage("Successfully create new storage: " + musicLibrary.getRecordsList(newGenreName));
+			ds.DisplayMessage(WRITING_TO_FILE_SUCCESS + musicLibrary.getRecordsList(newGenreName));
 		}catch (IllegalArgumentException | IOException e) {
 			ds.DisplayError(e);
 		}
@@ -160,7 +163,7 @@ public class ManagementSystem implements Listener {
 				file.delete();
 			}
 			musicLibrary.removeRecordsList(genreName);
-			ds.DisplayMessage("Successfully remove storage: " + genreName);
+			ds.DisplayMessage(REMOVE_FILE_SUCCESS + genreName);
 		}catch (IllegalArgumentException | IOException e) {
 			ds.DisplayError(e);
 		}
@@ -195,7 +198,7 @@ public class ManagementSystem implements Listener {
     	}
 		try{
 			serialize("storage/"+newGenreName+".bin", musicLibrary.getRecordsList(newGenreName).getRecords());
-			ds.DisplayMessage("Successfully combined in storage: " + musicLibrary.getRecordsList(newGenreName));
+			ds.DisplayMessage(WRITING_TO_FILE_SUCCESS + musicLibrary.getRecordsList(newGenreName));
 		}catch (IOException e) {
 			ds.DisplayError(e);
 		}
@@ -205,6 +208,11 @@ public class ManagementSystem implements Listener {
     	for (RecordsList genre: musicLibrary.getRecordsLists())
     		ds.DisplayMessage(genre.getRecordsListName());
     }
+    
+	public void setRecordsListName(String oldGenreName, String newGenreName) {
+		// TODO Auto-generated method stub
+		
+	}
     
     public void searchItems(String keyField, String mask)
     {

@@ -18,32 +18,34 @@ import output.DisplaySystem;
  */
 public class CommandProcessor {
 	 
+	static final String INVITATION_TO_PRINT = "> ";
+	static final String REGEXP_SKIP_SPACES_IN_QUOTS = "((\\\"[^\"]+\\\")|\\S+)";
+	static final String SHIELDED_QUOTE = "\"";
+	static final String EMPTY_STRING = "";
     private Map<String, Command> commands;
 	private static DisplaySystem ds;
     private String consoleEncoding;
  
     public CommandProcessor(DisplaySystem ds, String consoleEncoding) {
         commands = new TreeMap<>();
-        Command cmd = new HelpCommand(commands);
-        commands.put(cmd.getName(), cmd);
-        cmd = new TrackCommand();
-        commands.put(cmd.getName(), cmd);
-        cmd = new GenreCommand();
-        commands.put(cmd.getName(), cmd);
-        cmd = new SearchCommand();
-        commands.put(cmd.getName(), cmd);
-        cmd = new ExitCommand();
-        commands.put(cmd.getName(), cmd);
+        putCommandIntoMap(new HelpCommand(commands), commands);
+        putCommandIntoMap(new TrackCommand(), commands);
+        putCommandIntoMap(new GenreCommand(), commands);
+        putCommandIntoMap(new SearchCommand(), commands);
+        putCommandIntoMap(new ExitCommand(), commands);
         this.consoleEncoding = consoleEncoding;
         this.ds = DisplaySystem.getInstance();
     }
  
+    private void putCommandIntoMap(Command c, Map<String, Command> map){
+    	map.put(c.getName(), c);
+    }
+    
     public void execute() {
         boolean result = true;
         Scanner scanner = new Scanner(System.in, consoleEncoding);
         do {
-        	
-        	ds.DisplaySymbols("> ");
+        	ds.DisplaySymbols(INVITATION_TO_PRINT);
             String fullCommand = scanner.nextLine();
             if (fullCommand == null || "".equals(fullCommand)) {
                 continue;
@@ -54,7 +56,7 @@ public class CommandProcessor {
             }
             Command cmd = commands.get(parser.command.toUpperCase());
             if (cmd == null) {
-            	ds.DisplayMessage("Command not found");
+            	ds.DisplayMessage(Command.COMMAND_NOT_FOUND);
                 continue;
             }
             result = cmd.execute(parser.args);
@@ -62,15 +64,15 @@ public class CommandProcessor {
     }
  
     private class ParsedCommand {
-        String command;
-        String[] args;
+        private String command;
+        private String[] args;
  
         public ParsedCommand(String line) {
         	List<String> result = new ArrayList<>();
-        	Pattern pattern = Pattern.compile("((\\\"[^\"]+\\\")|\\S+)");
+        	Pattern pattern = Pattern.compile(REGEXP_SKIP_SPACES_IN_QUOTS);
     		Matcher matcher = pattern.matcher(line);
     		while (matcher.find())
-    		   result.add(matcher.group().replaceAll("\"",""));
+    		   result.add(matcher.group().replaceAll(SHIELDED_QUOTE, EMPTY_STRING));
     	
             if (result != null) {
                 command = result.get(0);

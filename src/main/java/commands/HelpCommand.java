@@ -1,11 +1,19 @@
 package commands;
 
 import interfaces.Command;
+
 import java.util.Map;
 
 import output.DisplaySystem;
 
 class HelpCommand implements Command {
+	
+	private static final String COMMAND_DESCRIPTION = "Prints list of available commands";
+	private static final String COMMAND_NAME = "HELP";
+	private static final String NEW_LINE = "\n";
+	private static final String COLON = ": ";
+	private static final String INFO_MESSAGE_HELP = "Help for command ";
+	private static final String INFO_MESSAGE_AVAILABLE = "Available commands:\n";
 	private Map<String, Command> commands;
 	private DisplaySystem ds;
 	
@@ -17,14 +25,14 @@ class HelpCommand implements Command {
     @Override
     public boolean execute(String... args) {
         if (args == null) {
-        	ds.DisplayMessage("Available commands:\n" + LINE_DELIMITER);
+        	ds.DisplayMessage(INFO_MESSAGE_AVAILABLE + LINE_DELIMITER);
             for (Command cmd : commands.values()) {
-            	ds.DisplayMessage(cmd.getName() + ": " + cmd.getDescription());
+            	ds.DisplayMessage(cmd.getName() + COLON + cmd.getDescription());
             }
             ds.DisplayMessage(LINE_DELIMITER);
         } else {
             for (String cmd : args) {
-            	ds.DisplayMessage("Help for command " + cmd + ":\n" + LINE_DELIMITER);
+            	ds.DisplayMessage(INFO_MESSAGE_HELP + cmd + COLON + NEW_LINE + LINE_DELIMITER);
                 Command command = commands.get(cmd.toUpperCase());
                 if (command == null) {
                 	ds.DisplayMessage(COMMAND_NOT_FOUND);
@@ -44,11 +52,11 @@ class HelpCommand implements Command {
 
     @Override
     public String getName() {
-        return "HELP";
+        return COMMAND_NAME;
     }
 
     @Override
     public String getDescription() {
-        return "Prints list of available commands";
+        return COMMAND_DESCRIPTION;
     }
 }

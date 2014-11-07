@@ -8,6 +8,9 @@ import java.util.Map;
 
 class ExitCommand implements Command {
 	
+	private static final String COMMAND_DESCRIPTION = "Exits from command processor";
+	private static final String COMMAND_NAME = "EXIT";
+	private static final String EXIT_MESSAGE = "Finishing command processor... done.";
 	private Map<String, Command> commands;
 	private DisplaySystem ds;
 	
@@ -17,7 +20,7 @@ class ExitCommand implements Command {
 	
     @Override
     public boolean execute(String... args) {
-    	ds.DisplayMessage("Finishing command processor... done.");
+    	ds.DisplayMessage(EXIT_MESSAGE);
         return false;
     }
 
@@ -28,11 +31,11 @@ class ExitCommand implements Command {
 
     @Override
     public String getName() {
-        return "EXIT";
+        return COMMAND_NAME;
     }
 
     @Override
     public String getDescription() {
-        return "Exits from command processor";
+        return COMMAND_DESCRIPTION;
     }
 }
