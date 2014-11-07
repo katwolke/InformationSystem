@@ -7,8 +7,8 @@ import output.DisplaySystem;
  * Created by Morthanion on 06.11.2014.
  */
 public class SearchCommand implements Command{
-    DisplaySystem ds;
-    ManagementSystem ms;
+    private DisplaySystem ds;
+    private  ManagementSystem ms;
     public SearchCommand()
     {
         this.ds = DisplaySystem.getInstance();
@@ -45,7 +45,7 @@ public class SearchCommand implements Command{
 
     @Override
     public void printHelp() {
-        DisplaySystem.getInstance().DisplayMessage(
+    	ds.DisplayMessage(
                 "search is case-insensitive" +
                         "-t \"search mask\"			search by title \r\n" +
                         "-a \"search mask\"         search by album name \r\n" +

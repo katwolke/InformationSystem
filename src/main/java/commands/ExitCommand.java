@@ -1,6 +1,7 @@
 package commands;
 
 import interfaces.Command;
+import management.ManagementSystem;
 import output.DisplaySystem;
 
 import java.util.Map;
@@ -8,16 +9,21 @@ import java.util.Map;
 class ExitCommand implements Command {
 	
 	private Map<String, Command> commands;
+	private DisplaySystem ds;
+	
+    public ExitCommand() {
+		this.ds = DisplaySystem.getInstance();
+	}
 	
     @Override
     public boolean execute(String... args) {
-        System.out.println("Finishing command processor... done.");
+    	ds.DisplayMessage("Finishing command processor... done.");
         return false;
     }
 
     @Override
     public void printHelp() {
-        DisplaySystem.getInstance().DisplayMessage(getDescription());
+       ds.DisplayMessage(getDescription());
     }
 
     @Override

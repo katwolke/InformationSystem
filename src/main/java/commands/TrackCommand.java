@@ -1,35 +1,36 @@
 package commands;
 
 import interfaces.Command;
-
-import java.util.logging.Logger;
-
 import management.ManagementSystem;
 import output.DisplaySystem;
 
 class TrackCommand implements Command {
 	
-	ManagementSystem ms;
-   
+	private ManagementSystem ms;
+	private DisplaySystem ds;
+	
+    public TrackCommand() {
+		this.ds = DisplaySystem.getInstance();
+		this.ms = ManagementSystem.getInstance();
+	}
+	
 	@Override
     public boolean execute(String... args) {
-		ms = ManagementSystem.getInstance();
-    	Logger log = Logger.getAnonymousLogger();
-    	 if (args == null) {
-    		 log.warning("You must specify the parameter. Type \"help track\" to view available" );
+		if (args == null) {
+			ds.DisplayMessage("You must specify the parameter. Type \"help track\" to view available" );
          } else {
         	 String command = args[0];
         	 switch(command){
         	 case "-i":
         		 if((args.length -1 == 0)){
-                     DisplaySystem.getInstance().DisplayMessage("Enter track title to process" );
+        			 ds.DisplayMessage("Enter track title to process" );
         			 break;
         		 }
         		 ms.printTrackInfo(args[1]); 
                  break;
         	 case "-s":
         		 if((args.length -1 == 0)){
-                     DisplaySystem.getInstance().DisplayMessage("Enter track title and parameters with new values to process" );
+        			 ds.DisplayMessage("Enter track title and parameters with new values to process" );
         			 break;
         		 }
         		 String[] setArgs = { "-", args[1], "-", "-", "-"};
@@ -56,7 +57,7 @@ class TrackCommand implements Command {
                  break;
         	 case "-a":
         		 if((args.length -1 == 0)){
-                     DisplaySystem.getInstance().DisplayMessage("Enter parameters, \r\n" +
+        			 ds.DisplayMessage("Enter parameters, \r\n" +
         			 		"Example: -a \"genre\" \"title\" \"singer\" \"Album\" Record length" );
         			 break;
         		 }
@@ -66,7 +67,7 @@ class TrackCommand implements Command {
                  break;
         	 case "-r":
         		 if((args.length -1 == 0)){
-                     DisplaySystem.getInstance().DisplayMessage("Enter track title and genre to remove" );
+        			 ds.DisplayMessage("Enter track title and genre to remove" );
         			 break;
         		 }
         		 ms.removeRecord(args[1], args[2]);
@@ -78,7 +79,7 @@ class TrackCommand implements Command {
                  ms.printAllTracksTitle();
                  break;
         	 default:
-        		 log.warning("Parameter <" + command + "> didn't defined");
+        		 ds.DisplayMessage("Parameter <" + command + "> didn't defined");
         	 }
          }
         return true;
@@ -86,7 +87,7 @@ class TrackCommand implements Command {
 
     @Override
     public void printHelp() {
-        DisplaySystem.getInstance().DisplayMessage(
+    	ds.DisplayMessage(
         		"-i \"track title\"				get track info \r\n" +
         		"-s \"track title\" \"parameter\" \"new value\"	set track info, you can change several parameters at once, \r\n" +
         		"						use the key -g to set track genre, please \r\n" +

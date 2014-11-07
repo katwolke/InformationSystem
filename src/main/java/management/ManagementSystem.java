@@ -152,19 +152,14 @@ public class ManagementSystem implements Listener {
 	}
     
     public void removeRecordsList(String genreName){
-    	try{
-    		musicLibrary.getRecordsList("Unsorted");
-    	}catch (IllegalArgumentException e){
-    		musicLibrary.setRecordsList("Unsorted");
-    	}
     	combineRecordsLists("Unsorted", genreName, "Unsorted");
-    	musicLibrary.removeRecordsList(genreName);
     	try{
 			serialize("storage/Unsorted.bin", musicLibrary.getRecordsList("Unsorted").getRecords());
 			File file = new File("storage/"+genreName+".bin");
 			if(file.exists()) {
 				file.delete();
 			}
+			musicLibrary.removeRecordsList(genreName);
 			ds.DisplayMessage("Successfully remove storage: " + genreName);
 		}catch (IllegalArgumentException | IOException e) {
 			ds.DisplayError(e);
@@ -172,11 +167,21 @@ public class ManagementSystem implements Listener {
     }
     
     public void moveAllRecordsAnotherSet(String genreNameFrom, String genreNameTo){
-    	RecordsList genreTo = musicLibrary.getRecordsList(genreNameTo);
-    	for(Record record:musicLibrary.getRecordsList(genreNameFrom).getRecords()){
-    		record.setGenre(genreNameTo);
-    		genreTo.insertRecord(record);
-    	}
+    	RecordsList genreTo = null;
+    	try{
+    		genreTo  = musicLibrary.getRecordsList(genreNameTo);
+    	}catch (IllegalArgumentException e){
+			musicLibrary.setRecordsList(genreNameTo);
+		}
+    	try{
+    		for(Record record:musicLibrary.getRecordsList(genreNameFrom).getRecords()){
+        		record.setGenre(genreNameTo);
+        		genreTo.insertRecord(record);
+        	}
+    		musicLibrary.removeRecordsList(genreNameFrom);
+    	}catch (IllegalArgumentException e){
+    		ds.DisplayError(e);
+		}
     }
     
     public void combineRecordsLists(String genreName1, String genreName2, String newGenreName) {
@@ -184,16 +189,10 @@ public class ManagementSystem implements Listener {
     		moveAllRecordsAnotherSet(genreName2, genreName1);
     	else if(newGenreName.equalsIgnoreCase(genreName2))
     		moveAllRecordsAnotherSet(genreName1, genreName2);
-    	else 
-    		try{
-    			musicLibrary.getRecordsList(newGenreName);
-    			moveAllRecordsAnotherSet(genreName1, newGenreName);
-    			moveAllRecordsAnotherSet(genreName2, newGenreName);
-    		}catch (IllegalArgumentException e){
-    			musicLibrary.setRecordsList(newGenreName);
-    			moveAllRecordsAnotherSet(genreName1, newGenreName);
-    			moveAllRecordsAnotherSet(genreName2, newGenreName);
-    		}
+    	else {
+    		moveAllRecordsAnotherSet(genreName1, newGenreName);
+    		moveAllRecordsAnotherSet(genreName2, newGenreName);
+    	}
 		try{
 			serialize("storage/"+newGenreName+".bin", musicLibrary.getRecordsList(newGenreName).getRecords());
 			ds.DisplayMessage("Successfully combined in storage: " + musicLibrary.getRecordsList(newGenreName));
@@ -207,10 +206,6 @@ public class ManagementSystem implements Listener {
     		ds.DisplayMessage(genre.getRecordsListName());
     }
     
-    /*
-     * Not sure about Collection<SearchableRecord>
-     *     may be separate search in genres/tracks???
-     */
     public void searchItems(String keyField, String mask)
     {
         Collection<Record> fits = new ArrayList<Record>();
@@ -220,7 +215,7 @@ public class ManagementSystem implements Listener {
             Record checked = trackIterator.next();
             if (checked.fitsMask(keyField, mask)) fits.add(checked);
         }
-        DisplaySystem.getInstance().DisplayList(fits);
+        ds.DisplayList(fits);
     }
     
     private static void serialize(String fileName, Object obj) throws IOException{

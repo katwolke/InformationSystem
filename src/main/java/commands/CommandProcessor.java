@@ -54,7 +54,7 @@ public class CommandProcessor {
             }
             Command cmd = commands.get(parser.command.toUpperCase());
             if (cmd == null) {
-                DisplaySystem.getInstance().DisplayMessage("Command not found");
+            	ds.DisplayMessage("Command not found");
                 continue;
             }
             result = cmd.execute(parser.args);

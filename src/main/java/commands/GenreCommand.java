@@ -1,14 +1,12 @@
 package commands;
 
-import java.util.TreeSet;
-
 import interfaces.Command;
 import management.ManagementSystem;
 import output.DisplaySystem;
 
 public class GenreCommand implements Command {
 
-	ManagementSystem ms;
+	private ManagementSystem ms;
 	private DisplaySystem ds;
 	
     public GenreCommand() {

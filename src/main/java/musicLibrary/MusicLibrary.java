@@ -20,7 +20,6 @@ public class MusicLibrary implements Library{
 	
 	public List<RecordsList> getRecordsLists(){
 		return genres;
-
     }
 
     public void AddListener(Listener listener)
