@@ -40,7 +40,12 @@ public class CommandProcessor {
         Scanner scanner = new Scanner(System.in, consoleEncoding);
         do {
         	ds.DisplaySymbols(INVITATION_TO_PRINT);
-            String fullCommand = scanner.nextLine();
+        	String fullCommand = "";
+        	String line;
+        	do  {
+        		line = scanner.nextLine();
+        		 fullCommand += line;
+        	 }while (!line.contains("/"));
             if (fullCommand == null || "".equals(fullCommand)) {
                 continue;
             }
