@@ -155,7 +155,9 @@ class TrackCommand implements Command {
 
 			@Override
 			public void process(String... args) {
-				ms.insertTrack(args);
+				String[] arguments = new String[args.length - 1];
+				System.arraycopy(args, 1, arguments, 0, arguments.length);
+				ms.insertTrack(arguments);
 			}
 		},
 		GENRE(SUBCOMMAND_SETGENRE_FORMAT.substring(0, 2)){

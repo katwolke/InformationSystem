@@ -113,23 +113,16 @@ public class ManagementSystem implements Listener {
     }
 	
 	public void insertTrack(String ... args) {
-		ds.DisplayMessage(STATUS_INSERTING);
-		List<String> genreList = new ArrayList<>();
-		for(int i=1;i<args.length; i=i+5){
-			Record newTrack = new Track (args[i], args[i+1], args[i+2], args[i+3], args[i+4]);
-			if (((i-1)%5)==0 && newTrack !=null){
-				musicLibrary.insertRecord(newTrack);
-				genreList.add(newTrack.getGenre());
-			}
-		}
-		for (String genreName:genreList)
-			serialize(genreName);
+			ds.DisplayMessage(STATUS_INSERTING);
+			Record newTrack = new Track(args[0], args[1], args[2], args[3], args[4]);
+			musicLibrary.insertRecord(newTrack);
+			serialize(newTrack.getGenre());
 	}
 	
 	public void setTrack(String trackTitle, String ... args){
 		ds.DisplayMessage(STATUS_SETTING);
+		Record track = musicLibrary.getRecord(trackTitle);
 		try {
-			Record track = musicLibrary.getRecord(trackTitle);
 			BeanInfo bi = Introspector.getBeanInfo(track.getClass());
 			for(int i=0;i<args.length;i++)
 				for (PropertyDescriptor pd: bi.getPropertyDescriptors()) {
@@ -140,7 +133,10 @@ public class ManagementSystem implements Listener {
 						}
 				}
 			serialize(track.getGenre());
-		} catch (IntrospectionException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		} catch (IntrospectionException 
+				| IllegalAccessException 
+				| IllegalArgumentException 
+				| InvocationTargetException e) {
 			ds.DisplayError(e);
 		}
 	}
