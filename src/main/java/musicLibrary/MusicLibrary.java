@@ -109,7 +109,7 @@ public class MusicLibrary implements Library{
 		genres.remove(getRecordsList(genreName));
 	}
 	
-	public void setRecordsList(String newGenreName){
+	public void insertRecordsList(String newGenreName){
 		for(RecordsList genre:genres)
 			if(genre.getRecordsListName().equalsIgnoreCase(newGenreName))
 				throw new IllegalArgumentException("Genre, with name <" + newGenreName + "> already exist");

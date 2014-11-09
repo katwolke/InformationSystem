@@ -109,7 +109,7 @@ public class Track implements Serializable, Record {
     @Override
     public boolean fitsMask(String keyField, String mask) {
         String checked = null;
-        switch(keyField.toLowerCase().charAt(0)){
+        switch(keyField.charAt(1)){
             case 'a':
                 checked = this.getAlbum();
                 break;

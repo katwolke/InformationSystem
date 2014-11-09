@@ -1,4 +1,5 @@
 package commands;
+
 import interfaces.Command;
 import management.ManagementSystem;
 import output.DisplaySystem;
@@ -7,29 +8,27 @@ import output.DisplaySystem;
  * Created by Morthanion on 06.11.2014.
  */
 public class SearchCommand implements Command{
-	
-	private static final String PRINT_HELP = "search is case-insensitive \r\n" +
-            "-t <search mask>			search by title \r\n" +
-            "-a <search mask>         search by album name \r\n" +
-            "-g <search mask>			search by genre \r\n" +
-            "-s <search mask>			search by singer \r\n" +
-            "-l <search mask>			search by length \r\n" +
-            "search mask example \" *m?3 \"\r\n"+
-            "where \"*\" - any or none symbols\r\n"+
-            "      \"?\" - any or none single symbol\r\n";
+
 	private static final String COMMAND_DESCRIPTION = "Defines operations with genre list";
 	private static final String COMMAND_NAME = "SEARCH";
 	private static final String WARNING_NO_COMMAND_PARAMETER = "You must specify the parameter. Type \"help search\" to view available";
-	static final String WARNING_SUBCOMMAND = "Enter <search mask> to process";
-	private static final String KEY_FIELD_TITLE = "Title";
-	private static final String KEY_FIELD_ALBUM = "Album";
-	private static final String KEY_FIELD_GENRE = "Genre";
-	private static final String KEY_FIELD_SINGER = "Singer";
-	private static final String KEY_FIELD_LENGTH = "Length";
-
-	
+	private static final String WARNING_SUBCOMMAND = "Enter <search mask> to process";
+	private static final String SUBCOMMAND_TITLE_FORMAT = "-t <search mask>";
+	private static final String SUBCOMMAND_TITLE_FORMAT_DESCRIPTION = "search by title";
+	private static final String SUBCOMMAND_ALBUM_FORMAT = "-a <search mask>";
+	private static final String SUBCOMMAND_ALBUM_FORMAT_DESCRIPTION = "search by album name";
+	private static final String SUBCOMMAND_GENRE_FORMAT = "-g <search mask>";
+	private static final String SUBCOMMAND_GENRE_FORMAT_DESCRIPTION = "search by genre";
+	private static final String SUBCOMMAND_SINGER_FORMAT = "-s <search mask>";
+	private static final String SUBCOMMAND_SINGER_FORMAT_DESCRIPTION = "search by singer";
+	private static final String SUBCOMMAND_LENGTH_FORMAT = "-l <search mask>";
+	private static final String SUBCOMMAND_LENGTH_FORMAT_DESCRIPTION = "search by length";
+	private static final String MASK_DESCRIPTION = "search is case-insensitive \r\n" +
+			"search mask example \" *m?3 \"\r\n"+
+			"where \"*\" - any or none symbols\r\n"+
+			"      \"?\" - any or none single symbol\r\n";
     private DisplaySystem ds;
-    private  ManagementSystem ms;
+    private static  ManagementSystem ms;
     public SearchCommand()
     {
         this.ds = DisplaySystem.getInstance();
@@ -39,36 +38,23 @@ public class SearchCommand implements Command{
     public boolean execute(String... args) {
         if (args == null)
             ds.DisplayMessage(WARNING_NO_COMMAND_PARAMETER);
-        if((args.length -1 == 0))
-   			 ds.DisplayMessage(WARNING_SUBCOMMAND);
-        else {
-        	String command = args[0];
-            switch(command){
-                case "-t":
-                    ms.searchItems(KEY_FIELD_TITLE, args[1]);
-                    break;
-                case "-a":
-                    ms.searchItems(KEY_FIELD_ALBUM, args[1]);
-                    break;
-                case "-g":
-                    ms.searchItems(KEY_FIELD_GENRE, args[1]);
-                    break;
-                case "-s":
-                    ms.searchItems(KEY_FIELD_SINGER, args[1]);
-                    break;
-                case "-l":
-                    ms.searchItems(KEY_FIELD_LENGTH, args[1]);
-                    break;
-                default:
-                    ds.DisplayMessage(COMMAND_NOT_FOUND);
-            }
-        }
+        else try{
+        	SubCommand subCommand = SubCommand.getName(args[0]);
+			if(args.length < 2)
+				ds.DisplayMessage(WARNING_SUBCOMMAND);	
+			else 
+				subCommand.process(args);		
+		} catch (RuntimeException e){
+			ds.DisplayError(e);
+		}
         return true;
     }
 
     @Override
     public void printHelp() {
-    	ds.DisplayMessage(PRINT_HELP);
+    	for(SubCommand sc: SubCommand.values())
+			ds.DisplayHelp(sc.getFormat(), sc.getDescription());
+	   	ds.DisplayMessage(MASK_DESCRIPTION);
     }
 
     @Override
@@ -80,4 +66,107 @@ public class SearchCommand implements Command{
     public String getDescription() {
         return COMMAND_DESCRIPTION;
     }
+    
+    private enum SubCommand{
+		TITLE(SUBCOMMAND_TITLE_FORMAT.substring(0, 2)){
+			@Override
+			public String getDescription(){
+				return SUBCOMMAND_TITLE_FORMAT_DESCRIPTION;
+			}
+
+			@Override
+			public String getFormat() {
+				return SUBCOMMAND_TITLE_FORMAT;
+			}
+
+			@Override
+			public void process(String... args) {
+				ms.searchItems(TITLE.getKey(), args[1]);
+			}
+		}, 
+		ALBUM(SUBCOMMAND_ALBUM_FORMAT.substring(0, 2)){
+			@Override
+			public String getDescription(){
+				return SUBCOMMAND_ALBUM_FORMAT_DESCRIPTION;
+			}
+
+			@Override
+			public String getFormat() {
+				return SUBCOMMAND_ALBUM_FORMAT;
+			}
+
+			@Override
+			public void process(String... args) {
+				ms.searchItems(ALBUM.getKey(), args[1]);
+			}
+		}, 
+		GENRE(SUBCOMMAND_GENRE_FORMAT.substring(0, 2)){
+			@Override
+			public String getDescription(){
+				return SUBCOMMAND_GENRE_FORMAT_DESCRIPTION;
+			}
+
+			@Override
+			public String getFormat() {
+				return SUBCOMMAND_GENRE_FORMAT;
+			}
+
+			@Override
+			public void process(String... args) {
+				ms.searchItems(GENRE.getKey(), args[1]);
+			}
+		}, 
+		SINGER(SUBCOMMAND_SINGER_FORMAT.substring(0, 2)){
+			@Override
+			public String getDescription(){
+				return SUBCOMMAND_SINGER_FORMAT_DESCRIPTION;
+			}
+
+			@Override
+			public String getFormat() {
+				return  SUBCOMMAND_SINGER_FORMAT;
+			}
+
+			@Override
+			public void process(String... args) {
+				ms.searchItems(SINGER.getKey(), args[1]);
+			}
+		}, 
+		LENGTH(SUBCOMMAND_LENGTH_FORMAT.substring(0, 2)){
+			@Override
+			public String getDescription(){
+				return SUBCOMMAND_LENGTH_FORMAT_DESCRIPTION;
+			}
+
+			@Override
+			public String getFormat() {
+				return SUBCOMMAND_LENGTH_FORMAT;
+			}
+
+			@Override
+			public void process(String... args) {
+				ms.searchItems(LENGTH.getKey(), args[1]);
+			}
+		};
+		
+		private final String key;
+	    SubCommand(String key) {
+	        this.key = key;
+	    }
+		public abstract String getFormat();
+		public abstract String getDescription();
+		public abstract void process(String...args);
+		
+		public static SubCommand getName(String key) {
+	        for (SubCommand sCom: SubCommand.values()) {
+	            if (sCom.getKey().equals(key)) {
+	                return sCom;
+	            }
+	        }
+	        throw new RuntimeException(COMMAND_NOT_FOUND);
+	    }
+		public  String getKey(){
+			return this.key;	
+		}
+	}
 }
