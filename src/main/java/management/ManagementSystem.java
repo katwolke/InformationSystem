@@ -46,17 +46,19 @@ public class ManagementSystem implements Listener {
 	private static final String FILE_ENCODING_VALUE = "UTF-8";
 	private static final String WARNING_ENCODING = "Unsupported encoding set for console, call support ";
 	private Library musicLibrary;
-	private static DisplaySystem ds;
-    private static ManagementSystem instance;
+	private static DisplaySystem ds; //you know, i've got this, why you need to provide display system! 
+	//Because you force UI representaion everywhere in code, that is not right, 
+	//please think about sinle output protocol, such interaction is not real MVC
+    private static ManagementSystem instance;//please  provide real Singleton
 
-	public ManagementSystem(){
-        MusicLibrary library = new MusicLibrary(loadGenres(STORAGE));
+	public ManagementSystem(){//Singleton couldn't have any public constructors, they are SINGLETONS!
+        MusicLibrary library = new MusicLibrary(loadGenres(STORAGE));//aha, take a look into loadGeneres method, ds resource is not initialised! 
         library.AddListener(this);
         this.musicLibrary = library;
-        this.ds = DisplaySystem.getInstance();
+        this.ds = DisplaySystem.getInstance();// i like that initialisation of resources performed in constructors, in most situations that is right
     }
 
-    public static synchronized ManagementSystem getInstance(){
+    public static synchronized ManagementSystem getInstance(){ // take a look at Singleton pattern, if it were implemented right, you should not perform any synchronisation
         if (instance == null) {
             instance = new ManagementSystem();
         }
@@ -116,7 +118,7 @@ public class ManagementSystem implements Listener {
 			ds.DisplayMessage(STATUS_INSERTING);
 			Record newTrack = new Track(args[0], args[1], args[2], args[3], args[4]);
 			musicLibrary.insertRecord(newTrack);
-			serialize(newTrack.getGenre());
+			serialize(newTrack.getGenre());//what i see? duplicated operations please consider instead special datastorage service
 	}
 	
 	public void setTrack(String trackTitle, String ... args){
@@ -137,7 +139,7 @@ public class ManagementSystem implements Listener {
 				| IllegalAccessException 
 				| IllegalArgumentException 
 				| InvocationTargetException e) {
-			ds.DisplayError(e);
+			ds.DisplayError(e);// lovely, other exceptions won't be displayed? No, that is not right
 		}
 	}
 	
@@ -246,7 +248,7 @@ public class ManagementSystem implements Listener {
 		return obj;
 	}
 
-    public static void main(String[] args){
+    public static void main(String[] args){// i definitely don't like that initialisation of all project located in manager, no plese application starup to special service
     	getInstance();
     	System.setProperty(FILE_ENCODING, FILE_ENCODING_VALUE);
     	System.setProperty(CONSOLE_ENCODING, CONSOLE_ENCODING_VALUE);
@@ -256,13 +258,13 @@ public class ManagementSystem implements Listener {
     		ds.DisplayMessage(WARNING_ENCODING);
     	}
     	ds.DisplayMessage(WELCOME_MESSAGE);
-    	CommandProcessor cp = new CommandProcessor(ds, CONSOLE_ENCODING_VALUE);
+    	CommandProcessor cp = new CommandProcessor(ds, CONSOLE_ENCODING_VALUE);// command processor should be resource of what? i don't think that resource of nothing
     	cp.execute();
     }
 
     @Override
     public void doEvent(Object arg) {
        if (arg.getClass().equals(String.class)) ds.DisplayMessage((String)arg);
-       if (arg instanceof Exception) ds.DisplayError((Exception) arg);
+       if (arg instanceof Exception) ds.DisplayError((Exception) arg)
     }
 }
