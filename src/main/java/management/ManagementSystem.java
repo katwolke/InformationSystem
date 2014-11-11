@@ -1,18 +1,15 @@
 package management;
 
-import interfaces.*;
+import interfaces.Library;
+import interfaces.Listener;
+import interfaces.Record;
+import interfaces.RecordsList;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,13 +20,17 @@ import java.util.List;
 import musicLibrary.Genre;
 import musicLibrary.MusicLibrary;
 import musicLibrary.Track;
+
+import org.apache.log4j.Logger;
+
 import output.DisplaySystem;
+
 import commands.CommandProcessor;
 
 public class ManagementSystem implements Listener {
 	
-
-	private static final String STORAGE = "STORAGE/";
+	private static final Object START = "Start application";
+	private static final String STORAGE = "Storage/";
 	private static final String UNSORTED_RECORDSLIST_NAME = "Unsorted";
 	private static final String FILE_EXTENSION = ".bin";
 	private static final String DOT = ".";
@@ -44,16 +45,23 @@ public class ManagementSystem implements Listener {
 	private static final String CONSOLE_ENCODING_VALUE = "Cp866";
 	private static final String FILE_ENCODING = "file.encoding";
 	private static final String FILE_ENCODING_VALUE = "UTF-8";
-	private static final String WARNING_ENCODING = "Unsupported encoding set for console, call support ";
-	private Library musicLibrary;
+	private static final String WARNING_ENCODING = "Unsupported encoding set for console, the application will be closed, please contact support ";
+	private static final String WARNING_UNHANDLE = "A critical error has occurred, the application will be closed, please contact support";
+	private static final String WARNING_GENRE_ALREADY_EXIST = " genre already exist";
+	
 	private static DisplaySystem ds;
     private static ManagementSystem instance;
 
+    private static final Logger log = Logger.getLogger(ManagementSystem.class);
+    private static final Logger rlog = Logger.getRootLogger();
+	private Library musicLibrary;
+    private  List<String> genreFilesDuplicates = new ArrayList<>();;
+
 	public ManagementSystem(){
+        ManagementSystem.ds = DisplaySystem.getInstance();
         MusicLibrary library = new MusicLibrary(loadGenres(STORAGE));
         library.AddListener(this);
         this.musicLibrary = library;
-        this.ds = DisplaySystem.getInstance();
     }
 
     public static synchronized ManagementSystem getInstance(){
@@ -65,19 +73,68 @@ public class ManagementSystem implements Listener {
     
     public List<RecordsList> loadGenres(String storage){
     	List<RecordsList> genres = new ArrayList<>();
+    	Collection<Record> tracks = new HashSet<>();
+    	boolean inserted;
     	try {
 			File dir = new File(storage.concat(DOT));
-			for(String path : dir.list()){
-				if((path.substring(path.lastIndexOf(DOT), path.length()).equals(FILE_EXTENSION)))
-					genres.add(new Genre(path.substring(0, path.lastIndexOf(DOT)), (HashSet)deserialize(storage + path, HashSet.class)));
-			}
+			for(File file : dir.listFiles())
+				if((file.getName().endsWith(FILE_EXTENSION))&& file.isFile()){
+					inserted =false;
+					tracks = (HashSet)deserialize(storage + file.getName(), HashSet.class);
+					if (!tracks.isEmpty()){
+						String genreName = tracks.iterator().next().getGenre();
+						for(RecordsList genre:genres)
+							if(genre.getRecordsListName().equals(genreName)){
+								genre.getRecords().addAll(tracks);
+								genreFilesDuplicates.add(genreName);
+								inserted =true;
+							}
+						if(!inserted){
+							genres.add(new Genre(genreName, tracks));
+						}
+					}
+				}
 		} catch (ClassNotFoundException | IOException e) {
 			ds.DisplayError(e);
+			log.error(e.getMessage(), e);
 		} 
 		return genres;
     }
     
-    public void printAllTracksTitle(){
+	public void writeUnsavedChanges() {
+		if(!genreFilesDuplicates.isEmpty()){
+			for(String genreName:genreFilesDuplicates)
+				serialize(genreName);
+			
+			File dir = new File(STORAGE.concat(DOT));
+		    List<String> genresNameList = new ArrayList<>();
+		    for (RecordsList genre: musicLibrary.getRecordsLists())
+		    	genresNameList.add(genre.getRecordsListName());
+		   
+		    List<String> filesNameList = new ArrayList<>();
+		    for(String path : dir.list())
+		    	if(new File(STORAGE + path).isFile())
+		    		filesNameList.add(path.substring(0, path.lastIndexOf(DOT)));
+	
+		    boolean match;
+		    for ( Iterator<String> files = filesNameList.iterator(); files.hasNext(); ) {
+		    	match = false;
+		    	String fileName = (String) files.next();
+		    	for ( Iterator<String> names = genresNameList.iterator(); names.hasNext(); ) {
+		    		String genreName = (String)names.next();
+		    		if ( genreName.equals(fileName)) {
+		    			match = true;
+		    		}
+		    	}
+		    	if ( !match ) {
+		    		new File(STORAGE+fileName+FILE_EXTENSION).deleteOnExit();
+		    		log.info(STORAGE+fileName+FILE_EXTENSION +" was removed");
+		    	}
+		    }
+		}
+	}
+
+	public void printAllTracksTitle(){
     	ds.DisplayList(musicLibrary.getAllRecords());
     }
 
@@ -156,13 +213,14 @@ public class ManagementSystem implements Listener {
     	}
     }
 
-    public void insertRecordsList(String newGenreName) {
-		try{
-			musicLibrary.insertRecordsList(newGenreName);
-			serialize(newGenreName);
-		}catch (IllegalArgumentException e) {
-			ds.DisplayError(e);
+    public void insertRecordsList(String genreName) {
+		Collection<Record> newGenreTracks = new HashSet<>();
+		if(!musicLibrary.checkExist(genreName)){
+			musicLibrary.insertRecordsList(genreName, newGenreTracks);
+			serialize(genreName);
 		}
+		else
+			ds.DisplayMessage(WARNING_GENRE_ALREADY_EXIST);
 	}
     
     public void removeRecordsList(String genreName){
@@ -181,7 +239,7 @@ public class ManagementSystem implements Listener {
     	try{
     		genreTo  = musicLibrary.getRecordsList(genreNameTo);
     	}catch (IllegalArgumentException e){
-			musicLibrary.insertRecordsList(genreNameTo);
+			insertRecordsList(genreNameTo);
 		}try{
     		for(Record record:musicLibrary.getRecordsList(genreNameFrom).getRecords()){
         		record.setGenre(genreNameTo);
@@ -239,6 +297,7 @@ public class ManagementSystem implements Listener {
 			ds.DisplayMessage(STATUS_WRITING_TO_FILE_SUCCESS + objName);
 		}catch (IOException e) {
 			ds.DisplayError(e);
+			log.warn(e.getMessage(), e);
 		}
 	}
 	
@@ -246,22 +305,29 @@ public class ManagementSystem implements Listener {
 		Object obj = null;
 		try (ObjectInputStream objectInStream = new ObjectInputStream(new FileInputStream(new File(fileName)));) {
 			obj = (classType) objectInStream.readObject();
+		} catch (ClassCastException e){
+			log.warn(e.getMessage(), e);
 		}
 		return obj;
 	}
-
+    
     public static void main(String[] args){
-    	getInstance();
-    	System.setProperty(FILE_ENCODING, FILE_ENCODING_VALUE);
-    	System.setProperty(CONSOLE_ENCODING, CONSOLE_ENCODING_VALUE);
+    	log.info(START);
     	try {
+        	getInstance();
+        	System.setProperty(FILE_ENCODING, FILE_ENCODING_VALUE);
+        	System.setProperty(CONSOLE_ENCODING, CONSOLE_ENCODING_VALUE);
     		System.setOut(new PrintStream(System.out, true, CONSOLE_ENCODING_VALUE));
-    	} catch (java.io.UnsupportedEncodingException ex) {
+        	ds.DisplayMessage(WELCOME_MESSAGE);
+        	CommandProcessor cp = new CommandProcessor(ds, CONSOLE_ENCODING_VALUE);
+        	cp.execute();
+    	} catch (UnsupportedEncodingException ex) {
     		ds.DisplayMessage(WARNING_ENCODING);
+    		rlog.fatal(ex.getMessage(), ex);
+    	} catch (Throwable e){
+    		ds.DisplayMessage(WARNING_UNHANDLE);
+    		rlog.fatal(e.getMessage(), e);;
     	}
-    	ds.DisplayMessage(WELCOME_MESSAGE);
-    	CommandProcessor cp = new CommandProcessor(ds, CONSOLE_ENCODING_VALUE);
-    	cp.execute();
     }
 
     @Override

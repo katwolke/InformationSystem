@@ -13,7 +13,6 @@ import java.util.List;
 public class MusicLibrary implements Library{
 	private static final String WARNING_NO_CORRECT_VALUE = "- wrong value, or you forgot to use quotation marks";
 	private static final Object STATUS_SUCCESSFUL = "Operation successful";
-	private static final String GENRE_ALREADY_EXIST = " genre already exist";
 	private List<RecordsList> genres;
     private Collection<Listener> listeners;
 	public MusicLibrary(List<RecordsList> genres) {
@@ -112,12 +111,15 @@ public class MusicLibrary implements Library{
 		genres.remove(getRecordsList(genreName));
 	}
 	
-	public void insertRecordsList(String newGenreName){
+	public boolean checkExist(String newGenreName){
 		for(RecordsList genre:genres)
 			if(genre.getRecordsListName().equalsIgnoreCase(newGenreName))
-				throw new IllegalArgumentException(newGenreName + GENRE_ALREADY_EXIST);
-			
-			Collection<Record> newGenreTracks = new HashSet<>();
-			genres.add(new Genre(newGenreName, newGenreTracks));
+				return true;
+		return false;
+	}
+	
+	public void insertRecordsList(String newGenreName, Collection<Record> newGenreTracks){
+			if(!checkExist(newGenreName))
+				genres.add(new Genre(newGenreName, newGenreTracks));
 	}
 }

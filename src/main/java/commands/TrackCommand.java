@@ -1,5 +1,7 @@
 package commands;
 
+import org.apache.log4j.Logger;
+
 import interfaces.Command;
 import management.ManagementSystem;
 import output.DisplaySystem;
@@ -32,6 +34,7 @@ class TrackCommand implements Command {
 	private static final String SUBCOMMAND_PRINT_FORMAT_DESCRIPTION = "print titles of all available tracks";
 	private static final String ARGUMENT_LENGTH_REPLACEMENT = "recordLength";
 	private static final String ARGUMENT_TITLE_REPLACEMENT = "trackTitle";
+	private static final Logger log = Logger.getLogger(TrackCommand.class);
 	
 	private static ManagementSystem ms;
 	private DisplaySystem ds;
@@ -51,8 +54,9 @@ class TrackCommand implements Command {
 				ds.DisplayMessage(subCommand.getWarning());	
 			else 
 				subCommand.process(args);		
-		} catch (RuntimeException e){
+		} catch (IllegalArgumentException e){
 			ds.DisplayError(e);
+			log.warn(e.getMessage(), e);
 		}
         return true;
     }
@@ -252,7 +256,7 @@ class TrackCommand implements Command {
 	        for (SubCommand sCom: SubCommand.values()) 
 	            if (sCom.getKey().equals(key)) 
 	                return sCom;
-	        throw new RuntimeException(COMMAND_NOT_FOUND);
+	        throw new IllegalArgumentException(COMMAND_NOT_FOUND);
 	    }
 		
 		public  String getKey(){
