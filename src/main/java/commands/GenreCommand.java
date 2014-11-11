@@ -237,7 +237,7 @@ public class GenreCommand implements Command {
 		public abstract void process(String...args);
 		
 		public static SubCommand getName(String key) {
-	        for (SubCommand sCom: SubCommand.values()) {
+	        for (SubCommand sCom: SubCommand.values()) {//Yes idea with subcommands is good, but implementation is not perfect, please think about improvement of generalisation of subactions usage 
 	            if (sCom.getKey().equals(key)) {
 	                return sCom;
 	            }
